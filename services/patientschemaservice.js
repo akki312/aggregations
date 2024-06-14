@@ -41,22 +41,64 @@ async function deletePatientMedicine(id) {
 }
 
 // Aggregate patient medicine records (example aggregation)
+// Aggregate patient medicine records (example deep aggregation)
 async function aggregatePatientMedicines() {
   const results = await PatientMedicine.aggregate([
+    // Unwind drugInfo array
     {
       $unwind: '$drugInfo'
     },
+    // Match stage: filter out expired drugs
+    {
+      $match: {
+        'drugInfo.expireDate': {
+          $gte: new Date()
+        }
+      }
+    },
+    // Group stage: group by patientID, calculate total drugs, total quantity, and total amount
     {
       $group: {
         _id: '$patientID',
         totalDrugs: { $sum: 1 },
         totalQuantity: { $sum: '$drugInfo.quantity' },
-        totalAmount: { $sum: '$drugInfo.amount' }
+        totalAmount: { $sum: '$drugInfo.amount' },
+        drugDetails: { $push: '$drugInfo' }
+      }
+    },
+    // Lookup stage: join with patients collection (example)
+    {
+      $lookup: {
+        from: 'patients', // Assuming there is a patients collection
+        localField: '_id',
+        foreignField: 'patientID',
+        as: 'patientDetails'
+      }
+    },
+    // Unwind patientDetails array (optional, if there's only one matching document per patient)
+    {
+      $unwind: {
+        path: '$patientDetails',
+        preserveNullAndEmptyArrays: true
+      }
+    },
+    // Project stage: reshape the final output
+    {
+      $project: {
+        patientID: '$_id',
+        totalDrugs: 1,
+        totalQuantity: 1,
+        totalAmount: 1,
+        drugDetails: 1,
+        patientName: '$patientDetails.name', // Assuming the patients collection has a name field
+        patientContact: '$patientDetails.contact' // Assuming the patients collection has a contact field
       }
     }
   ]);
+
   return results;
 }
+
 
 module.exports = {
   createPatientMedicine,
