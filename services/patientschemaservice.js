@@ -40,8 +40,8 @@ async function deletePatientMedicine(id) {
   return patientMedicine;
 }
 
-// Aggregate patient medicine records (example aggregation)
-// Aggregate patient medicine records (example deep aggregation)
+
+// Aggregate patient medicine records (deep aggregation)
 async function aggregatePatientMedicines() {
   const results = await PatientMedicine.aggregate([
     // Unwind drugInfo array
