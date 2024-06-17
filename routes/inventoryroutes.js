@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const inventoryService = require('../services/inventoryservice');
-
+const mongoose = require('mongoose');
 // Create a new inventory item
 router.post('/inventory', async (req, res) => {
   try {
@@ -14,8 +14,9 @@ router.post('/inventory', async (req, res) => {
 
 // Get inventory item by ID
 router.get('/inventory/:id', async (req, res) => {
+  const { id } = req.params; // Extract id from URL parameters
   try {
-    const inventory = await inventoryService.getInventoryById(req.params.id);
+    const inventory = await inventoryService.getInventoryById(id);
     res.json(inventory);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -33,7 +34,7 @@ router.get('/inventory', async (req, res) => {
 });
 
 // Update inventory item
-router.post('/inventory/:id', async (req, res) => {
+router.put('/inventory/:id', async (req, res) => { // Changed from router.post to router.put
   try {
     const inventory = await inventoryService.updateInventory(req.params.id, req.body);
     res.json(inventory);
@@ -43,7 +44,7 @@ router.post('/inventory/:id', async (req, res) => {
 });
 
 // Delete inventory item
-router.post('/inventory/:id', async (req, res) => {
+router.delete('/inventory/:id', async (req, res) => { // Changed from router.post to router.delete
   try {
     const inventory = await inventoryService.deleteInventory(req.params.id);
     res.json(inventory);
@@ -51,5 +52,24 @@ router.post('/inventory/:id', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+// Get financial summary
+router.get('/inventory/summary', async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+    return res.status(400).json({ message: 'startDate and endDate are required' });
+  }
+
+  try {
+    // Call your service or function to fetch inventory summary
+    const summary = await inventoryService.getFinancialSummary(startDate, endDate);
+    res.json(summary);
+  } catch (error) {
+    console.error('Error fetching inventory summary:', error.message);
+    res.status(500).json({ message: 'Failed to fetch inventory summary' });
+  }
+});
+
 
 module.exports = router;
