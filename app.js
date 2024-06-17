@@ -18,6 +18,7 @@ mongoose.connect('mongodb+srv://akshithsistla:ccipnWsoxp5NQ0nm@cluster0.iljkeyx.
 app.use(bodyParser.json());
 
 app.use('/api', inventoryRoutes);
+app.use('/patients', inventoryRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

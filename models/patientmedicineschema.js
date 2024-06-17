@@ -111,4 +111,4 @@ const patientMedicineSchema = mongoose.Schema({
   couponID: { type: String },
   couponCode: { type: String }
 });
-  module.exports = patientMedicineSchema;
+module.exports = mongoose.model('patients', patientMedicineSchema);
