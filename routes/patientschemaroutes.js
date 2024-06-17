@@ -1,6 +1,7 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const  mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const router = express.Router;
 const patientMedicineService = require('../services/patientschemaservice'); // Assuming your service is in this file
 
 
@@ -65,5 +66,21 @@ app.get('/api/patientMedicines/aggregate', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+router.get('/cashflow', async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+    return res.status(400).json({ message: 'startDate and endDate are required' });
+  }
+
+  try {
+    const result = await getCashFlowAnalysis(startDate, endDate);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 
 module.exports= router;
