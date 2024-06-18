@@ -97,6 +97,22 @@ router.get('/sales-graph', async (req, res) => {
   }
 });
 
+router.get('/order-summary', async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+    return res.status(400).json({ message: 'startDate and endDate are required' });
+  }
+
+  try {
+    const result = await getOrderSummary(startDate, endDate);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 
 
 module.exports= router;

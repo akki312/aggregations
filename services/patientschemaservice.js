@@ -169,6 +169,56 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
   });
 }
 
+async function getOrderSummary(startDate, endDate) {
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(endDate);
+  end.setHours(23, 59, 59, 999);
+
+  const results = await PatientMedicine.aggregate([
+    {
+      $match: {
+        orderedOn: { $gte: start, $lte: end },
+      }
+    },
+    {
+      $group: {
+        _id: "$orderFrom",
+        totalOrders: { $sum: 1 }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalOrders: { $sum: "$totalOrders" },
+        ordersByPlatform: {
+          $push: {
+            platform: "$_id",
+            count: "$totalOrders"
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        totalOrders: 1,
+        ordersByPlatform: 1
+      }
+    }
+  ]);
+
+  if (results.length === 0) {
+    return {
+      totalOrders: 0,
+      ordersByPlatform: []
+    };
+  }
+  return results[0];
+}
+
+
 
 
 
