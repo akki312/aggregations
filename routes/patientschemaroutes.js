@@ -38,7 +38,7 @@ router.get('/api/patientMedicines', async (req, res) => {
 });
 
 // Update patient medicine record
-router.put('/api/patientMedicines/:id', async (req, res) => {
+router.post('/api/patientMedicines/:id', async (req, res) => {
   try {
     const patientMedicine = await patientMedicineService.updatePatientMedicine(req.params.id, req.body);
     res.status(200).json(patientMedicine);
