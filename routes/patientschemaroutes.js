@@ -8,7 +8,7 @@ const patientMedicineService = require('../services/patientschemaservice'); // A
 
 
 // Create a new patient medicine record
-app.post('/api/patientMedicines', async (req, res) => {
+router.post('/api/patientMedicines', async (req, res) => {
   try {
     const patientMedicine = await patientMedicineService.createPatientMedicine(req.body);
     res.status(201).json(patientMedicine);
@@ -18,7 +18,7 @@ app.post('/api/patientMedicines', async (req, res) => {
 });
 
 // Get patient medicine record by ID
-app.get('/api/patientMedicines/:id', async (req, res) => {
+router.get('/api/patientMedicines/:id', async (req, res) => {
   try {
     const patientMedicine = await patientMedicineService.getPatientMedicineById(req.params.id);
     res.status(200).json(patientMedicine);
@@ -28,7 +28,7 @@ app.get('/api/patientMedicines/:id', async (req, res) => {
 });
 
 // Get all patient medicine records
-app.get('/api/patientMedicines', async (req, res) => {
+router.get('/api/patientMedicines', async (req, res) => {
   try {
     const patientMedicines = await patientMedicineService.getAllPatientMedicines();
     res.status(200).json(patientMedicines);
@@ -38,7 +38,7 @@ app.get('/api/patientMedicines', async (req, res) => {
 });
 
 // Update patient medicine record
-app.put('/api/patientMedicines/:id', async (req, res) => {
+router.put('/api/patientMedicines/:id', async (req, res) => {
   try {
     const patientMedicine = await patientMedicineService.updatePatientMedicine(req.params.id, req.body);
     res.status(200).json(patientMedicine);
@@ -48,7 +48,7 @@ app.put('/api/patientMedicines/:id', async (req, res) => {
 });
 
 // Delete patient medicine record
-app.post('/api/patientMedicines/:id', async (req, res) => {
+router.post('/api/patientMedicines/:id', async (req, res) => {
   try {
     const patientMedicine = await patientMedicineService.deletePatientMedicine(req.params.id);
     res.status(200).json(patientMedicine);
@@ -58,7 +58,7 @@ app.post('/api/patientMedicines/:id', async (req, res) => {
 });
 
 // Aggregate patient medicine records
-app.get('/api/patientMedicines/aggregate', async (req, res) => {
+router.get('/api/patientMedicines/aggregate', async (req, res) => {
   try {
     const results = await patientMedicineService.aggregatePatientMedicines();
     res.status(200).json(results);
