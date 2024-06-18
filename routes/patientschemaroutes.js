@@ -112,6 +112,14 @@ router.get('/order-summary', async (req, res) => {
   }
 });
 
+router.get('/order-samples', async (req, res) => {
+  try {
+    const result = await getOrderSamples();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 
 
