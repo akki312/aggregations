@@ -112,7 +112,7 @@ router.get('/order-summary', async (req, res) => {
   }
 });
 
-router.get('/order-samples', async (req, res) => {
+router.post('/order-samples', async (req, res) => {
   try {
     const result = await getOrderSamples();
     res.json(result);
@@ -121,7 +121,7 @@ router.get('/order-samples', async (req, res) => {
   }
 });
 
-router.get('/top-customers', async (req, res) => {
+router.post('/top-customers', async (req, res) => {
   try {
     const topCustomers = await patientMedicineService.getTopCustomers();
     res.json(topCustomers);
