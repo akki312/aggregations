@@ -82,5 +82,21 @@ router.get('/cashflow', async (req, res) => {
   }
 });
 
+router.get('/sales-graph', async (req, res) => {
+  const { startDate, endDate, groupBy } = req.query;
+
+  if (!startDate || !endDate || !groupBy) {
+    return res.status(400).json({ message: 'startDate, endDate, and groupBy are required' });
+  }
+
+  try {
+    const result = await getSalesGraphData(startDate, endDate, groupBy);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 
 module.exports= router;
