@@ -123,7 +123,7 @@ router.get('/order-samples', async (req, res) => {
 
 router.get('/top-customers', async (req, res) => {
   try {
-    const topCustomers = await getTopCustomers();
+    const topCustomers = await patientMedicineService.getTopCustomers();
     res.json(topCustomers);
   } catch (error) {
     res.status(500).json({ message: error.message });
