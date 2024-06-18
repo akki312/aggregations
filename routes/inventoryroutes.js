@@ -80,5 +80,15 @@ router.get('/low-stock-drugs', async (req, res) => {
   }
 });
 
+router.get('/expired-drugs', async (req, res) => {
+  try {
+    const expiredDrugs = await getExpiredDrugs();
+    res.json(expiredDrugs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 
 module.exports = router;

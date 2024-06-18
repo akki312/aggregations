@@ -243,7 +243,31 @@ async function getLowStockDrugs() {
   return results;
 }
 
+async function getExpiredDrugs() {
+  const today = new Date();
+  const pipeline = [
+    {
+      $match: {
+        expiryDate: { $lt: today }
+      }
+    },
+    {
+      $project: {
+        drugName: 1,
+        quantity: 1,
+        expiryDate: 1,
+        supplierName: 1,
+        drugType: 1,
+        batchID: 1,
+        mrp: 1,
+        rate: 1
+      }
+    }
+  ];
 
+  const results = await Inventory.aggregate(pipeline);
+  return results;
+}
 
 
 
@@ -254,5 +278,6 @@ module.exports = {
   updateInventory,
   deleteInventory,
   getFinancialSummary,
-  getLowStockDrugs
+  getLowStockDrugs,
+  getExpiredDrugs
 };
