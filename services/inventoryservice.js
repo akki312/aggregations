@@ -217,45 +217,32 @@ async function getFinancialSummary(startDate, endDate) {
   ]);
 }
 
-async function getOrderSamples() {
+async function getLowStockDrugs() {
   const pipeline = [
     {
-      $facet: {
-        pendingOrders: [
-          { $match: { status: "ORDER_PAYMENT_PENDING" } },
-          { $limit: 5 }
-        ],
-        completedOrders: [
-          { $match: { status: "ORDER_DELIVERED" } },
-          { $limit: 5 }
-        ],
-        cancelledOrders: [
-          { $match: { status: "ORDER_CANCELLED" } },
-          { $limit: 5 }
-        ]
+      $match: {
+        quantity: { $lt: 10 }
       }
     },
     {
       $project: {
-        pendingOrders: 1,
-        completedOrders: 1,
-        cancelledOrders: 1
+        drugName: 1,
+        quantity: 1,
+        thresholdValue: 1,
+        supplierName: 1,
+        drugType: 1,
+        batchID: 1,
+        expireDate: 1,
+        mrp: 1,
+        rate: 1
       }
     }
   ];
 
-  const results = await PatientMedicine.aggregate(pipeline);
-
-  if (results.length === 0) {
-    return {
-      pendingOrders: [],
-      completedOrders: [],
-      cancelledOrders: []
-    };
-  }
-
-  return results[0];
+  const results = await Inventory.aggregate(pipeline);
+  return results;
 }
+
 
 
 
@@ -267,5 +254,5 @@ module.exports = {
   updateInventory,
   deleteInventory,
   getFinancialSummary,
-  getOrderSamples
+  getLowStockDrugs
 };

@@ -71,10 +71,10 @@ router.get('/inventory/summary', async (req, res) => {
   }
 });
 
-router.get('/order-samples', async (req, res) => {
+router.get('/low-stock-drugs', async (req, res) => {
   try {
-    const result = await getOrderSamples();
-    res.json(result);
+    const lowStockDrugs = await getLowStockDrugs();
+    res.json(lowStockDrugs);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
