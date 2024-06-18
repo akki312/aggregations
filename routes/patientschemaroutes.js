@@ -1,5 +1,5 @@
 const express = require('express');
-const  mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const router = express.Router;
 const patientMedicineService = require('../services/patientschemaservice'); // Assuming your service is in this file
@@ -48,7 +48,7 @@ app.put('/api/patientMedicines/:id', async (req, res) => {
 });
 
 // Delete patient medicine record
-app.delete('/api/patientMedicines/:id', async (req, res) => {
+app.post('/api/patientMedicines/:id', async (req, res) => {
   try {
     const patientMedicine = await patientMedicineService.deletePatientMedicine(req.params.id);
     res.status(200).json(patientMedicine);
