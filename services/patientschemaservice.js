@@ -259,7 +259,32 @@ async function getOrderSamples() {
   return results[0];
 }
 
+async function getTopCustomers() {
+  const pipeline = [
+    {
+      $group: {
+        _id: "$patientName",
+        totalPurchases: { $sum: 1 }
+      }
+    },
+    {
+      $sort: { totalPurchases: -1 }
+    },
+    {
+      $limit: 5
+    },
+    {
+      $project: {
+        _id: 0,
+        patientName: "$_id",
+        totalPurchases: 1
+      }
+    }
+  ];
 
+  const results = await PatientMedicine.aggregate(pipeline);
+  return results;
+}
 
 
 
@@ -272,5 +297,6 @@ module.exports = {
   getCashFlowAnalysis,
   getSalesGraphData,
   getOrderSummary,
-  getOrderSamples
+  getOrderSamples,
+  getTopCustomers
 };
