@@ -217,6 +217,48 @@ async function getFinancialSummary(startDate, endDate) {
   ]);
 }
 
+async function getOrderSamples() {
+  const pipeline = [
+    {
+      $facet: {
+        pendingOrders: [
+          { $match: { status: "ORDER_PAYMENT_PENDING" } },
+          { $limit: 5 }
+        ],
+        completedOrders: [
+          { $match: { status: "ORDER_DELIVERED" } },
+          { $limit: 5 }
+        ],
+        cancelledOrders: [
+          { $match: { status: "ORDER_CANCELLED" } },
+          { $limit: 5 }
+        ]
+      }
+    },
+    {
+      $project: {
+        pendingOrders: 1,
+        completedOrders: 1,
+        cancelledOrders: 1
+      }
+    }
+  ];
+
+  const results = await PatientMedicine.aggregate(pipeline);
+
+  if (results.length === 0) {
+    return {
+      pendingOrders: [],
+      completedOrders: [],
+      cancelledOrders: []
+    };
+  }
+
+  return results[0];
+}
+
+
+
 
 module.exports = {
   createInventory,
@@ -224,5 +266,6 @@ module.exports = {
   getAllInventories,
   updateInventory,
   deleteInventory,
-  getFinancialSummary
+  getFinancialSummary,
+  getOrderSamples
 };
