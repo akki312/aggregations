@@ -67,7 +67,7 @@ router.get('/api/patientMedicines/aggregate', async (req, res) => {
   }
 });
 
-router.get('/cashflow', async (req, res) => {
+router.get('/api/cashflow', async (req, res) => {
   const { startDate, endDate } = req.query;
 
   if (!startDate || !endDate) {
@@ -82,7 +82,7 @@ router.get('/cashflow', async (req, res) => {
   }
 });
 
-router.get('/sales-graph', async (req, res) => {
+router.get('/api/sales-graph', async (req, res) => {
   const { startDate, endDate, groupBy } = req.query;
 
   if (!startDate || !endDate || !groupBy) {
