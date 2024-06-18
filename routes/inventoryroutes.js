@@ -90,5 +90,13 @@ router.get('/expired-drugs', async (req, res) => {
 });
 
 
+router.get('/expiring-soon-drugs', async (req, res) => {
+  try {
+    const expiringSoonDrugs = await getDrugsExpiringSoon();
+    res.json(expiringSoonDrugs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 module.exports = router;
