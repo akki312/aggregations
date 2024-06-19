@@ -54,7 +54,7 @@ router.delete('/inventory/:id', async (req, res) => { // Changed from router.pos
 });
 
 // Get financial summary
-router.get('/inventory/summary', async (req, res) => {
+router.post('/inventory/summary', async (req, res) => {
   const { startDate, endDate } = req.query;
 
   if (!startDate || !endDate) {
@@ -62,8 +62,12 @@ router.get('/inventory/summary', async (req, res) => {
   }
 
   try {
+    // Convert the date strings to Date objects
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
     // Call your service or function to fetch inventory summary
-    const summary = await inventoryService.getFinancialSummary(startDate, endDate);
+    const summary = await inventoryService.getFinancialSummary(start, end);
     res.json(summary);
   } catch (error) {
     console.error('Error fetching inventory summary:', error.message);
