@@ -105,7 +105,7 @@ async function getCashFlowAnalysis(startDate, endDate) {
   return result;
 }
 
-function getStartEndDates(startDate, endDate, groupBy) {
+async function getStartEndDates(startDate, endDate, groupBy) {
   const start = new Date(startDate);
   start.setHours(0, 0, 0, 0);
 
@@ -145,8 +145,7 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
   ]);
 
   return results.map(result => {
-    let startDate;
-    let endDate;
+    let startDate, endDate;
     if (groupBy === 'DAY') {
       startDate = new Date(result._id.year, result._id.month - 1, result._id.day);
       endDate = new Date(result._id.year, result._id.month - 1, result._id.day);
@@ -168,6 +167,7 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
     };
   });
 }
+
 
 async function getOrderSummary(startDate, endDate) {
   const start = new Date(startDate);
