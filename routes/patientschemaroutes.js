@@ -75,7 +75,7 @@ router.get('/api/cashflow', async (req, res) => {
   }
 
   try {
-    const result = await getCashFlowAnalysis(startDate, endDate);
+    const result = await patientMedicineService.getCashFlowAnalysis(startDate, endDate);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -90,7 +90,7 @@ router.get('/api/sales-graph', async (req, res) => {
   }
 
   try {
-    const result = await getSalesGraphData(startDate, endDate, groupBy);
+    const result = await patientMedicineService.getSalesGraphData(startDate, endDate, groupBy);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -105,7 +105,7 @@ router.get('/order-summary', async (req, res) => {
   }
 
   try {
-    const result = await getOrderSummary(startDate, endDate);
+    const result = await patientMedicineService.getOrderSummary(startDate, endDate);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -114,7 +114,7 @@ router.get('/order-summary', async (req, res) => {
 
 router.post('/order-samples', async (req, res) => {
   try {
-    const result = await getOrderSamples();
+    const result = await patientMedicineService.getOrderSamples();
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });

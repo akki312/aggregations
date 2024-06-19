@@ -73,7 +73,7 @@ router.get('/inventory/summary', async (req, res) => {
 
 router.get('/low-stock-drugs', async (req, res) => {
   try {
-    const lowStockDrugs = await getLowStockDrugs();
+    const lowStockDrugs = await inventoryService.getLowStockDrugs();
     res.json(lowStockDrugs);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -82,7 +82,7 @@ router.get('/low-stock-drugs', async (req, res) => {
 
 router.get('/expired-drugs', async (req, res) => {
   try {
-    const expiredDrugs = await getExpiredDrugs();
+    const expiredDrugs = await inventoryService.getExpiredDrugs();
     res.json(expiredDrugs);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -92,7 +92,7 @@ router.get('/expired-drugs', async (req, res) => {
 
 router.get('/expiring-soon-drugs', async (req, res) => {
   try {
-    const expiringSoonDrugs = await getDrugsExpiringSoon();
+    const expiringSoonDrugs = await inventoryService.getDrugsExpiringSoon();
     res.json(expiringSoonDrugs);
   } catch (error) {
     res.status(500).json({ message: error.message });
