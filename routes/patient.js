@@ -81,7 +81,7 @@ router.get('/cashflow', async (req, res) => {
   }
 });
 
-router.get('/api/sales-graph', async (req, res) => {
+router.get('/sales-graph', async (req, res) => {
   const { startDate, endDate, groupBy } = req.query;
 
   if (!startDate || !endDate || !groupBy) {
