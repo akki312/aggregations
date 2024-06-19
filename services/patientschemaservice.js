@@ -145,7 +145,8 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
   ]);
 
   return results.map(result => {
-    let startDate, endDate;
+    let startDate;
+    let endDate;
     if (groupBy === 'DAY') {
       startDate = new Date(result._id.year, result._id.month - 1, result._id.day);
       endDate = new Date(result._id.year, result._id.month - 1, result._id.day);
@@ -158,8 +159,9 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
       startDate = new Date(result._id.year, result._id.month - 1, 1);
       endDate = new Date(result._id.year, result._id.month, 0);
     }
-    startDate.setHours(0, 0, 0, 0);
-    endDate.setHours(23, 59, 59, 999);
+    const formattedDate = new Date(date);
+      formattedDate.setHours(23, 59, 59, 999);
+
     return {
       startDate: startDate.toISOString().split('T')[0],
       endDate: endDate.toISOString().split('T')[0],
@@ -167,7 +169,6 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
     };
   });
 }
-
 
 async function getOrderSummary(startDate, endDate) {
   const start = new Date(startDate);
