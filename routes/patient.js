@@ -1,7 +1,6 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const router = express.Router;
+
+const router = express.Router();
 const patientMedicineService = require('../services/patientschemaservice'); // Assuming your service is in this file
 
 
@@ -67,7 +66,7 @@ router.get('/api/patientMedicines/aggregate', async (req, res) => {
   }
 });
 
-router.get('/api/cashflow', async (req, res) => {
+router.get('/cashflow', async (req, res) => {
   const { startDate, endDate } = req.query;
 
   if (!startDate || !endDate) {
