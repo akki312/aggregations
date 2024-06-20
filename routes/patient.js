@@ -81,18 +81,19 @@ router.get('/cashflow', async (req, res) => {
   }
 });
 
-router.get('/sales-graph', async (req, res) => {
+router.get('/sales-graph-data', async (req, res) => {
   const { startDate, endDate, groupBy } = req.query;
 
   if (!startDate || !endDate || !groupBy) {
-    return res.status(400).json({ message: 'startDate, endDate, and groupBy are required' });
+    return res.status(400).json({ error: 'startDate, endDate, and groupBy are required parameters' });
   }
 
   try {
-    const result = await patientMedicineService.getSalesGraphData(startDate, endDate, groupBy);
-    res.json(result);
+    const salesGraphData = await patientMedicineService.getSalesGraphData(startDate, endDate, groupBy);
+    res.json(salesGraphData);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching sales graph data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
