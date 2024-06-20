@@ -20,7 +20,6 @@ app.use(bodyParser.json());
 
 app.use('/inventory', inventoryRoutes);
 app.use('/patients', patientRoutes);
-app
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
