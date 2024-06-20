@@ -147,6 +147,7 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
   return results.map(result => {
     let startDate;
     let endDate;
+    
     if (groupBy === 'DAY') {
       startDate = new Date(result._id.year, result._id.month - 1, result._id.day);
       endDate = new Date(result._id.year, result._id.month - 1, result._id.day);
@@ -159,8 +160,9 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
       startDate = new Date(result._id.year, result._id.month - 1, 1);
       endDate = new Date(result._id.year, result._id.month, 0);
     }
-    const formattedDate = new Date(date);
-      formattedDate.setHours(23, 59, 59, 999);
+
+    // Make sure the endDate includes the whole day
+    endDate.setHours(23, 59, 59, 999);
 
     return {
       startDate: startDate.toISOString().split('T')[0],
@@ -169,6 +171,37 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
     };
   });
 }
+
+// Example function to get the interval for grouping (you need to define this based on your requirements)
+function getStartEndDates(startDate, endDate, groupBy) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+  // Ensure the end date includes the whole day
+  end.setHours(23, 59, 59, 999);
+  
+  let interval;
+  if (groupBy === 'DAY') {
+    interval = {
+      year: { $year: "$orderedOn" },
+      month: { $month: "$orderedOn" },
+      day: { $dayOfMonth: "$orderedOn" }
+    };
+  } else if (groupBy === 'WEEK') {
+    interval = {
+      year: { $year: "$orderedOn" },
+      week: { $week: "$orderedOn" }
+    };
+  } else if (groupBy === 'MONTH') {
+    interval = {
+      year: { $year: "$orderedOn" },
+      month: { $month: "$orderedOn" }
+    };
+  }
+
+  return { start, end, interval };
+}
+
 
 async function getOrderSummary(startDate, endDate) {
   const start = new Date(startDate);
