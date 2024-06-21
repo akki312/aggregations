@@ -172,35 +172,7 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
   });
 }
 
-// Example function to get the interval for grouping (you need to define this based on your requirements)
-function getStartEndDates(startDate, endDate, groupBy) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  
-  // Ensure the end date includes the whole day
-  end.setHours(23, 59, 59, 999);
-  
-  let interval;
-  if (groupBy === 'DAY') {
-    interval = {
-      year: { $year: "$orderedOn" },
-      month: { $month: "$orderedOn" },
-      day: { $dayOfMonth: "$orderedOn" }
-    };
-  } else if (groupBy === 'WEEK') {
-    interval = {
-      year: { $year: "$orderedOn" },
-      week: { $week: "$orderedOn" }
-    };
-  } else if (groupBy === 'MONTH') {
-    interval = {
-      year: { $year: "$orderedOn" },
-      month: { $month: "$orderedOn" }
-    };
-  }
 
-  return { start, end, interval };
-}
 
 
 async function getOrderSummary(startDate, endDate) {
