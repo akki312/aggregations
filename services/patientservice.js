@@ -161,17 +161,16 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
       endDate = new Date(result._id.year, result._id.month, 0);
     }
 
-    // Make sure the endDate includes the whole day
-    endDate.setHours(23, 59, 59, 999);
+    
+    
 
     return {
-      startDate: startDate.toISOString().split('T')[0],
-      endDate: endDate.toISOString().split('T')[0],
+      startDate: startDate,
+      endDate: endDate,
       totalSales: result.totalSales
     };
   });
 }
-
 
 
 
