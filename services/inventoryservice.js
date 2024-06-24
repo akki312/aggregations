@@ -275,6 +275,10 @@ async function getDrugsExpiringSoon() {
   const oneMonthLater = new Date();
   oneMonthLater.setMonth(today.getMonth() + 1);
 
+  // Log the dates to verify correctness
+  console.log("Today's Date:", today);
+  console.log("One Month Later:", oneMonthLater);
+
   const pipeline = [
     {
       $match: {
@@ -295,9 +299,15 @@ async function getDrugsExpiringSoon() {
     }
   ];
 
+  // Execute the aggregation pipeline
   const results = await Inventory.aggregate(pipeline);
+
+  // Log the results to verify if any documents match the criteria
+  console.log("Results:", results);
+
   return results;
 }
+
 
 
 module.exports = {

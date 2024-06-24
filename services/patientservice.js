@@ -140,14 +140,19 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
       }
     },
     {
-      $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1, "_id.week": 1 }
+      $sort: {
+        "_id.year": 1,
+        ...(groupBy === 'MONTH' && { "_id.month": 1 }),
+        ...(groupBy === 'WEEK' && { "_id.week": 1 }),
+        ...(groupBy === 'DAY' && { "_id.month": 1, "_id.day": 1 })
+      }
     }
   ]);
 
   return results.map(result => {
     let startDate;
     let endDate;
-    
+
     if (groupBy === 'DAY') {
       startDate = new Date(result._id.year, result._id.month - 1, result._id.day);
       endDate = new Date(result._id.year, result._id.month - 1, result._id.day);
@@ -161,9 +166,6 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
       endDate = new Date(result._id.year, result._id.month, 0);
     }
 
-    
-    
-
     return {
       startDate: startDate,
       endDate: endDate,
@@ -171,7 +173,6 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
     };
   });
 }
-
 
 
 async function getOrderSummary(startDate, endDate) {
