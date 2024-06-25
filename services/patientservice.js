@@ -180,12 +180,11 @@ const getSalesGraphData = async (startDate, endDate, groupBy) => {
         endDate = new Date(result._id.year, result._id.month, 0);
       }
 
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 999);
+      
 
       return {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+        startDate: startDate,
+        endDate: endDate,
         totalSales: result.totalSales
       };
     });
