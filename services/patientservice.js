@@ -109,7 +109,7 @@ async function getCashFlowAnalysis(startDate, endDate) {
 const getStartEndDates = (startDate, endDate, groupBy) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
-  end.setHours(23, 59, 59, 999); 
+  end.setHours(23, 59, 59, 999); // Set end time to 23:59:59.999
 
   let interval;
   switch (groupBy) {
@@ -123,7 +123,7 @@ const getStartEndDates = (startDate, endDate, groupBy) => {
     case 'WEEK':
       interval = {
         year: { $year: "$orderedOn" },
-        week: { $isoWeek: "$orderedOn" }
+        week: { $week: "$orderedOn" }
       };
       break;
     case 'MONTH':
@@ -137,61 +137,54 @@ const getStartEndDates = (startDate, endDate, groupBy) => {
 };
 
 const getSalesGraphData = async (startDate, endDate, groupBy) => {
-  try {
-    const { start, end, interval } = getStartEndDates(startDate, endDate, groupBy);
+  const { start, end, interval } = getStartEndDates(startDate, endDate, groupBy);
 
-    const results = await PatientMedicine.aggregate([
-      {
-        $match: {
-          orderedOn: { $gte: start, $lte: end },
-        }
-      },
-      {
-        $group: {
-          _id: interval,
-          totalSales: { $sum: "$totalAmount" }
-        }
-      },
-      {
-        $sort: {
-          "_id.year": 1,
-          ...(groupBy === 'MONTH' && { "_id.month": 1 }),
-          ...(groupBy === 'WEEK' && { "_id.week": 1 }),
-          ...(groupBy === 'DAY' && { "_id.month": 1, "_id.day": 1 })
-        }
+  const results = await PatientMedicine.aggregate([
+    {
+      $match: {
+        orderedOn: { $gte: start, $lte: end },
       }
-    ]);
-
-    return results.map(result => {
-      let startDate, endDate;
-
-      if (groupBy === 'DAY') {
-        startDate = new Date(result._id.year, result._id.month - 1, result._id.day);
-        endDate = new Date(result._id.year, result._id.month - 1, result._id.day);
-      } else if (groupBy === 'WEEK') {
-        const firstDayOfYear = new Date(result._id.year, 0, 1);
-        const weekStartDate = new Date(firstDayOfYear.setDate(firstDayOfYear.getDate() + (result._id.week - 1) * 7));
-        const weekEndDate = new Date(weekStartDate);
-        weekEndDate.setDate(weekStartDate.getDate() + 6);
-        startDate = weekStartDate;
-        endDate = weekEndDate;
-      } else if (groupBy === 'MONTH') {
-        startDate = new Date(result._id.year, result._id.month - 1, 1);
-        endDate = new Date(result._id.year, result._id.month, 0);
+    },
+    {
+      $group: {
+        _id: interval,
+        totalSales: { $sum: "$totalAmount" }
       }
+    },
+    {
+      $sort: {
+        "_id.year": 1,
+        ...(groupBy === 'MONTH' && { "_id.month": 1 }),
+        ...(groupBy === 'WEEK' && { "_id.week": 1 }),
+        ...(groupBy === 'DAY' && { "_id.month": 1, "_id.day": 1 })
+      }
+    }
+  ]);
 
-      
+  return results.map(result => {
+    let startDate, endDate;
 
-      return {
-        startDate: startDate,
-        endDate: endDate,
-        totalSales: result.totalSales
-      };
-    });
-  } catch (error) {
-    console.error('Error in getSalesGraphData:', error.message);
-    throw error;
-  }
+    if (groupBy === 'DAY') {
+      startDate = new Date(result._id.year, result._id.month - 1, result._id.day);
+      endDate = new Date(result._id.year, result._id.month - 1, result._id.day);
+    } else if (groupBy === 'WEEK') {
+      const startOfWeek = new Date(result._id.year, 0, (result._id.week - 1) * 7 + 1);
+      const endOfWeek = new Date(result._id.year, 0, (result._id.week * 7));
+      startDate = startOfWeek;
+      endDate = endOfWeek;
+    } else if (groupBy === 'MONTH') {
+      startDate = new Date(result._id.year, result._id.month - 1, 1);
+      endDate = new Date(result._id.year, result._id.month, 0);
+    }
+
+   
+
+    return {
+      startDate: startDate,
+      endDate: endDate,
+      totalSales: result.totalSales
+    };
+  });
 };
 
 
