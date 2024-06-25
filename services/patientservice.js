@@ -332,6 +332,41 @@ async function getTopCustomers() {
   return results;
 }
 
+async function getFinancialSummary(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+  // Ensure the end date includes the whole day
+  end.setHours(23, 59, 59, 999);
+
+  try {
+    const result = await Inventory.aggregate([
+      {
+        $match: {
+          date: { $gte: start, $lte: end }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalSales: { $sum: "$sales" },
+          totalPurchases: { $sum: "$purchases" }
+        }
+      }
+    ]);
+
+    // Return a single object instead of an array
+    if (result.length > 0) {
+      return result[0];
+    } else {
+      return { totalSales: 0, totalPurchases: 0 };
+    }
+  } catch (error) {
+    console.error("Error in getFinancialSummary:", error);
+    throw error; // or handle error as appropriate
+  }
+}
+
 
 
 module.exports = {
@@ -344,5 +379,6 @@ module.exports = {
   getSalesGraphData,
   getOrderSummary,
   getOrderSamples,
-  getTopCustomers
+  getTopCustomers,
+  getFinancialSummary
 };
