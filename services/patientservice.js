@@ -105,26 +105,38 @@ async function getCashFlowAnalysis(startDate, endDate) {
   return result;
 }
 
-async function getStartEndDates(startDate, endDate, groupBy) {
+
+const getStartEndDates = (startDate, endDate, groupBy) => {
   const start = new Date(startDate);
-  start.setHours(0, 0, 0, 0);
-
   const end = new Date(endDate);
-  end.setHours(23, 59, 59, 999);
+  end.setHours(23, 59, 59, 999); // Set end time to 23:59:59.999
 
-  let interval = {};
-  if (groupBy === 'DAY') {
-    interval = { day: { $dayOfMonth: "$orderedOn" }, month: { $month: "$orderedOn" }, year: { $year: "$orderedOn" } };
-  } else if (groupBy === 'WEEK') {
-    interval = { week: { $week: "$orderedOn" }, year: { $year: "$orderedOn" } };
-  } else if (groupBy === 'MONTH') {
-    interval = { month: { $month: "$orderedOn" }, year: { $year: "$orderedOn" } };
+  let interval;
+  switch (groupBy) {
+    case 'DAY':
+      interval = {
+        year: { $year: "$orderedOn" },
+        month: { $month: "$orderedOn" },
+        day: { $dayOfMonth: "$orderedOn" }
+      };
+      break;
+    case 'WEEK':
+      interval = {
+        year: { $year: "$orderedOn" },
+        week: { $week: "$orderedOn" }
+      };
+      break;
+    case 'MONTH':
+      interval = {
+        year: { $year: "$orderedOn" },
+        month: { $month: "$orderedOn" }
+      };
+      break;
   }
-
   return { start, end, interval };
-}
+};
 
-async function getSalesGraphData(startDate, endDate, groupBy) {
+const getSalesGraphData = async (startDate, endDate, groupBy) => {
   const { start, end, interval } = getStartEndDates(startDate, endDate, groupBy);
 
   const results = await PatientMedicine.aggregate([
@@ -150,15 +162,14 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
   ]);
 
   return results.map(result => {
-    let startDate;
-    let endDate;
+    let startDate, endDate;
 
     if (groupBy === 'DAY') {
       startDate = new Date(result._id.year, result._id.month - 1, result._id.day);
       endDate = new Date(result._id.year, result._id.month - 1, result._id.day);
     } else if (groupBy === 'WEEK') {
       const startOfWeek = new Date(result._id.year, 0, (result._id.week - 1) * 7 + 1);
-      const endOfWeek = new Date(result._id.year, 0, result._id.week * 7);
+      const endOfWeek = new Date(result._id.year, 0, (result._id.week * 7));
       startDate = startOfWeek;
       endDate = endOfWeek;
     } else if (groupBy === 'MONTH') {
@@ -166,14 +177,16 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
       endDate = new Date(result._id.year, result._id.month, 0);
     }
 
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+
     return {
-      startDate: startDate,
-      endDate: endDate,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
       totalSales: result.totalSales
     };
   });
-}
-
+};
 
 
 async function getOrderSummary(startDate, endDate) {
