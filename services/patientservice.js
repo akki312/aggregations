@@ -175,6 +175,7 @@ async function getSalesGraphData(startDate, endDate, groupBy) {
 }
 
 
+
 async function getOrderSummary(startDate, endDate) {
   const start = new Date(startDate);
   start.setHours(0, 0, 0, 0);
