@@ -271,41 +271,37 @@ async function getExpiredDrugs() {
 }
 
 async function getDrugsExpiringSoon() {
-  const today = new Date();
-  const oneMonthLater = new Date();
-  oneMonthLater.setMonth(today.getMonth() + 1);
+  try {
+    const today = new Date();
+    const oneMonthLater = new Date();
+    oneMonthLater.setMonth(today.getMonth() + 1);
 
-  // Log the dates to verify correctness
-  console.log("Today's Date:", today);
-  console.log("One Month Later:", oneMonthLater);
-
-  const pipeline = [
-    {
-      $match: {
-        expiryDate: { $gte: today, $lte: oneMonthLater }
+    const pipeline = [
+      {
+        $match: {
+          expiryDate: { $gte: today, $lte: oneMonthLater }
+        }
+      },
+      {
+        $project: {
+          drugName: 1,
+          quantity: 1,
+          expiryDate: 1,
+          supplierName: 1,
+          drugType: 1,
+          batchID: 1,
+          mrp: 1,
+          rate: 1
+        }
       }
-    },
-    {
-      $project: {
-        drugName: 1,
-        quantity: 1,
-        expiryDate: 1,
-        supplierName: 1,
-        drugType: 1,
-        batchID: 1,
-        mrp: 1,
-        rate: 1
-      }
-    }
-  ];
+    ];
 
-  // Execute the aggregation pipeline
-  const results = await Inventory.aggregate(pipeline);
-
-  // Log the results to verify if any documents match the criteria
-  console.log("Results:", results);
-
-  return results;
+    const results = await Inventory.aggregate(pipeline);
+    return results;
+  } catch (error) {
+    console.error('Error fetching drugs expiring soon:', error.message);
+    throw error;
+  }
 }
 
 

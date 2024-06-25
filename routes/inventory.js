@@ -94,13 +94,13 @@ router.post('/expired-drugs', async (req, res) => {
 });
 
 
-router.get('/api/drugs-expiring-soon', async (req, res) => {
+router.post('/drugs/expiring-soon', async (req, res) => {
   try {
     const results = await inventoryService.getDrugsExpiringSoon();
-    res.status(200).json(results); // Send the results as a JSON response
+    res.json(results);
   } catch (error) {
-    console.error('Error fetching drugs expiring soon:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error('Error in API route:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
