@@ -109,7 +109,7 @@ async function getCashFlowAnalysis(startDate, endDate) {
 const getStartEndDates = (startDate, endDate, groupBy) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
-  end.setHours(23, 59, 59, 999); // Set end time to 23:59:59.999
+  end.setHours(23, 59, 59, 999); 
 
   let interval;
   switch (groupBy) {
