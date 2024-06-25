@@ -81,18 +81,18 @@ router.get('/cashflow', async (req, res) => {
   }
 });
 
-router.get('/sales-graph-data', async (req, res) => {
+router.get('/sales-graph', async (req, res) => {
   const { startDate, endDate, groupBy } = req.query;
 
   if (!startDate || !endDate || !groupBy) {
-    return res.status(400).json({ error: 'startDate, endDate, and groupBy are required parameters' });
+    return res.status(400).json({ error: 'Bad Request: Missing required query parameters' });
   }
 
   try {
-    const salesGraphData = await patientMedicineService.getSalesGraphData(startDate, endDate, groupBy);
-    res.json(salesGraphData);
+    const data = await patientMedicineService.getSalesGraphData(startDate, endDate, groupBy);
+    res.status(200).json(data);
   } catch (error) {
-    console.error('Error fetching sales graph data:', error);
+    console.error('Error fetching sales graph data:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
