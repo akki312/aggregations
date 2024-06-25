@@ -293,6 +293,43 @@ async function getDrugsExpiringSoon() {
           mrp: 1,
           rate: 1
         }
+      },
+      {
+        $sort: {
+          expiryDate: 1
+        }
+      },
+      {
+        $group: {
+          _id: "$drugType",
+          drugs: {
+            $push: {
+              drugName: "$drugName",
+              quantity: "$quantity",
+              expiryDate: "$expiryDate",
+              supplierName: "$supplierName",
+              batchID: "$batchID",
+              mrp: "$mrp",
+              rate: "$rate"
+            }
+          },
+          totalQuantity: { $sum: "$quantity" },
+          averageMRP: { $avg: "$mrp" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          drugType: "$_id",
+          drugs: 1,
+          totalQuantity: 1,
+          averageMRP: { $round: ["$averageMRP", 2] }
+        }
+      },
+      {
+        $sort: {
+          drugType: 1
+        }
       }
     ];
 
