@@ -270,6 +270,7 @@ async function getExpiredDrugs() {
   return results;
 }
 
+
 async function getDrugsExpiringSoon() {
   try {
     const today = new Date();
@@ -340,6 +341,7 @@ async function getDrugsExpiringSoon() {
     throw error;
   }
 }
+
 
 
 
