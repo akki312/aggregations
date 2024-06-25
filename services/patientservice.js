@@ -137,6 +137,7 @@ const getStartEndDates = (startDate, endDate, groupBy) => {
 };
 
 const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amountKey) => {
+  const interval = getStartEndDates(startDate, endDate, groupBy);
   const start = new Date(startDate);
   start.setHours(0, 0, 0, 0);
 
