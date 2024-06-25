@@ -340,7 +340,7 @@ async function getFinancialSummary(startDate, endDate) {
   end.setHours(23, 59, 59, 999);
 
   try {
-    const result = await Inventory.aggregate([
+    const result = PatientMedicine.aggregate([
       {
         $match: {
           date: { $gte: start, $lte: end }
