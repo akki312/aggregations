@@ -245,39 +245,29 @@ async function getLowStockDrugs() {
 }
 
 async function getExpiredDrugs() {
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const end = new Date(endDate);
-    endDate.setHours(23, 59, 59, 999); // Set to start of the day
-
-    const pipeline = [
-      {
-        $match: {
-          expiryDate: { $lt: today }
-        }
-      },
-      {
-        $project: {
-          drugName: 1,
-          quantity: 1,
-          expiryDate: 1,
-          supplierName: 1,
-          drugType: 1,
-          batchID: 1,
-          mrp: 1,
-          rate: 1
-        }
+  const today = new Date();
+  const pipeline = [
+    {
+      $match: {
+        expireDate: { $lt: today }
       }
-    ];
+    },
+    {
+      $project: {
+        drugName: 1,
+        quantity: 1,
+        expiryDate: 1,
+        supplierName: 1,
+        drugType: 1,
+        batchID: 1,
+        mrp: 1,
+        rate: 1
+      }
+    }
+  ];
 
-    const results = await Inventory.aggregate(pipeline);
-    console.log('Expired drugs:', results); // Log results for debugging
-    return results;
-  } catch (error) {
-    console.error('Error fetching expired drugs:', error.message);
-    throw error;
-  }
+  const results = await Inventory.aggregate(pipeline);
+  return results;
 }
 
 
@@ -290,7 +280,7 @@ async function getDrugsExpiringSoon() {
     const pipeline = [
       {
         $match: {
-          expiryDate: { $gte: today, $lte: oneMonthLater }
+          expireDate: { $gte: today, $lte: oneMonthLater }
         }
       },
       {
