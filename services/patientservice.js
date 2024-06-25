@@ -136,55 +136,81 @@ const getStartEndDates = (startDate, endDate, groupBy) => {
   return { start, end, interval };
 };
 
-const getSalesGraphData = async (startDate, endDate, groupBy) => {
-  const { start, end, interval } = getStartEndDates(startDate, endDate, groupBy);
+const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amountKey) => {
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
 
-  const results = await PatientMedicine.aggregate([
-    {
-      $match: {
-        orderedOn: { $gte: start, $lte: end },
+  const end = new Date(endDate);
+  end.setHours(23, 59, 59, 999);
+
+  try {
+    const results = await PatientMedicine.aggregate([
+      {
+        $match: {
+          licenseNumber: licenseNumber,
+          status: {
+            $in: [
+              "ORDER_CONFIRMED",
+              "ORDER_DISPATCHED",
+              "ORDER_READYTOPICK",
+              "ORDER_DELIVERED"
+            ]
+          },
+          billType: { $ne: "RETURN" },
+          orderedAt: {
+            $gte: start,
+            $lt: end
+          }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: `$${amountKey}` }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          totalAmount: 1
+        }
+      },
+      {
+        $sort: {
+          "interval.year": 1,
+          ...(groupBy === 'MONTH' && { "interval.month": 1 }),
+          ...(groupBy === 'WEEK' && { "interval.week": 1 }),
+          ...(groupBy === 'DAY' && { "interval.month": 1, "interval.day": 1 })
+        }
       }
-    },
-    {
-      $group: {
-        _id: interval,
-        totalSales: { $sum: "$totalAmount" }
+    ]);
+
+    return results.map(result => {
+      let startDate, endDate;
+
+      if (groupBy === 'DAY') {
+        startDate = new Date(result.interval.year, result.interval.month - 1, result.interval.day);
+        endDate = new Date(result.interval.year, result.interval.month - 1, result.interval.day);
+      } else if (groupBy === 'WEEK') {
+        const startOfWeek = new Date(result.interval.year, 0, (result.interval.week - 1) * 7 + 1);
+        const endOfWeek = new Date(result.interval.year, 0, (result.interval.week * 7));
+        startDate = startOfWeek;
+        endDate = endOfWeek;
+      } else if (groupBy === 'MONTH') {
+        startDate = new Date(result.interval.year, result.interval.month - 1, 1);
+        endDate = new Date(result.interval.year, result.interval.month, 0);
       }
-    },
-    {
-      $sort: {
-        "_id.year": 1,
-        ...(groupBy === 'MONTH' && { "_id.month": 1 }),
-        ...(groupBy === 'WEEK' && { "_id.week": 1 }),
-        ...(groupBy === 'DAY' && { "_id.month": 1, "_id.day": 1 })
-      }
-    }
-  ]);
 
-  return results.map(result => {
-    let startDate, endDate;
-
-    if (groupBy === 'DAY') {
-      startDate = new Date(result._id.year, result._id.month - 1, result._id.day);
-      endDate = new Date(result._id.year, result._id.month - 1, result._id.day);
-    } else if (groupBy === 'WEEK') {
-      const startOfWeek = new Date(result._id.year, 0, (result._id.week - 1) * 7 + 1);
-      const endOfWeek = new Date(result._id.year, 0, (result._id.week * 7));
-      startDate = startOfWeek;
-      endDate = endOfWeek;
-    } else if (groupBy === 'MONTH') {
-      startDate = new Date(result._id.year, result._id.month - 1, 1);
-      endDate = new Date(result._id.year, result._id.month, 0);
-    }
-
-   
-
-    return {
-      startDate: startDate,
-      endDate: endDate,
-      totalSales: result.totalSales
-    };
-  });
+      return {
+        startDate: startDate.toISOString().split('T')[0],  // Format to YYYY-MM-DD
+        endDate: endDate.toISOString().split('T')[0],  // Format to YYYY-MM-DD
+        totalSales: result.totalAmount
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching sales graph data:', error.message);
+    throw error;
+  }
 };
 
 
@@ -198,7 +224,7 @@ async function getOrderSummary(startDate, endDate) {
   const results = await PatientMedicine.aggregate([
     {
       $match: {
-        orderedOn: { $gte: start, $lte: end },
+        orderedAt: { $gte: start, $lte: end },
       }
     },
     {
