@@ -247,7 +247,9 @@ async function getLowStockDrugs() {
 async function getExpiredDrugs() {
   try {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of the day
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    endDate.setHours(23, 59, 59, 999); // Set to start of the day
 
     const pipeline = [
       {
