@@ -215,54 +215,59 @@ const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amo
 };
 
 
-async function getOrderSummary(startDate, endDate) {
+const getOrderSummary = async (startDate, endDate) => {
   const start = new Date(startDate);
   start.setHours(0, 0, 0, 0);
 
   const end = new Date(endDate);
   end.setHours(23, 59, 59, 999);
 
-  const results = await PatientMedicine.aggregate([
-    {
-      $match: {
-        orderedAt: { $gte: start, $lte: end },
-      }
-    },
-    {
-      $group: {
-        _id: "$orderFrom",
-        totalOrders: { $sum: 1 }
-      }
-    },
-    {
-      $group: {
-        _id: null,
-        totalOrders: { $sum: "$totalOrders" },
-        ordersByPlatform: {
-          $push: {
-            platform: "$_id",
-            count: "$totalOrders"
+  try {
+    const results = await PatientMedicine.aggregate([
+      {
+        $match: {
+          orderedAt: { $gte: start, $lte: end },
+        }
+      },
+      {
+        $group: {
+          _id: "$orderFrom",
+          totalOrders: { $sum: 1 }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalOrders: { $sum: "$totalOrders" },
+          ordersByPlatform: {
+            $push: {
+              platform: "$_id",
+              count: "$totalOrders"
+            }
           }
         }
+      },
+      {
+        $project: {
+          _id: 0,
+          totalOrders: 1,
+          ordersByPlatform: 1
+        }
       }
-    },
-    {
-      $project: {
-        _id: 0,
-        totalOrders: 1,
-        ordersByPlatform: 1
-      }
-    }
-  ]);
+    ]);
 
-  if (results.length === 0) {
-    return {
-      totalOrders: 0,
-      ordersByPlatform: []
-    };
+    if (results.length === 0) {
+      return {
+        totalOrders: 0,
+        ordersByPlatform: []
+      };
+    }
+    return results[0];
+  } catch (error) {
+    console.error('Error fetching order summary:', error.message);
+    throw error;
   }
-  return results[0];
-}
+};
 
 
 async function getOrderSamples() {
