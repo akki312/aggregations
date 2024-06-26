@@ -379,8 +379,8 @@ async function getFinancialSummary(startDate, endDate) {
       {
         $group: {
           _id: null,
-          totalSales: { $sum: "$sales" },
-          totalPurchases: { $sum: "$purchases" }
+          totalAmount: { $sum: "$amount" },
+          netAmount: { $sum: "$netamount" }
         }
       }
     ]);
