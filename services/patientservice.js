@@ -137,14 +137,38 @@ const getStartEndDates = (startDate, endDate, groupBy) => {
 };
 
 const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amountKey) => {
-  const interval = getStartEndDates(startDate, endDate, groupBy);
   const start = new Date(startDate);
   start.setHours(0, 0, 0, 0);
 
   const end = new Date(endDate);
   end.setHours(23, 59, 59, 999);
 
+  // Helper function to create the grouping interval object
+  const createIntervalObject = (groupBy) => {
+    switch (groupBy) {
+      case 'DAY':
+        return {
+          year: { $year: "$orderedAt" },
+          month: { $month: "$orderedAt" },
+          day: { $dayOfMonth: "$orderedAt" }
+        };
+      case 'WEEK':
+        return {
+          year: { $year: "$orderedAt" },
+          week: { $week: "$orderedAt" }
+        };
+      case 'MONTH':
+        return {
+          year: { $year: "$orderedAt" },
+          month: { $month: "$orderedAt" }
+        };
+      default:
+        throw new Error('Invalid groupBy value');
+    }
+  };
+
   try {
+    const interval = createIntervalObject(groupBy);
     const results = await PatientMedicine.aggregate([
       {
         $match: {
@@ -166,13 +190,14 @@ const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amo
       },
       {
         $group: {
-          _id: null,
+          _id: interval,
           totalAmount: { $sum: `$${amountKey}` }
         }
       },
       {
         $project: {
           _id: 0,
+          interval: "$_id",
           totalAmount: 1
         }
       },
