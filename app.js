@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const inventoryRoutes = require('./routes/inventory'); // Adjust the path as needed
+const inventoryRoutes = require('./routes/inventory'); 
 const patientRoutes = require('./routes/patient');
 
 const app = express();
