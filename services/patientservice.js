@@ -367,8 +367,9 @@ async function getTopCustomers() {
 async function getFinancialSummary(startDate, endDate) {
   const start = new Date(startDate);
   const end = new Date(endDate);
+  end.setHours(23, 59, 59, 999); // Ensure the end date includes the whole day
 
-  return await Inventory.aggregate([
+  const results = await PatientMedicine.aggregate([
     {
       $match: {
         orderedOn: { $gte: start, $lte: end },
@@ -377,26 +378,28 @@ async function getFinancialSummary(startDate, endDate) {
     {
       $group: {
         _id: null,
-        totalSales: { $sum: '$totalAmount' },
-        totalDiscount: { $sum: '$discount' },
-        totalProfit: { $sum: '$profit' },
+        totalProfit: { $sum: "$profit" },
+        totalDiscount: { $sum: "$discount" },
+        totalSales: { $sum: "$totalAmount" },
         totalRefunds: {
           $sum: {
-            $cond: [{ $eq: ['$status', 'ORDER_CANCELLED'] }, '$totalAmount', 0],
+            $cond: [{ $eq: ["$billType", "RETURN"] }, "$totalAmount", 0],
           },
         },
       },
     },
-    {
-      $project: {
-        _id: 0,
-        totalSales: 1,
-        totalDiscount: 1,
-        totalProfit: 1,
-        totalRefunds: 1,
-      },
-    },
   ]);
+
+  if (results.length > 0) {
+    return results[0];
+  } else {
+    return {
+      totalProfit: 0,
+      totalDiscount: 0,
+      totalSales: 0,
+      totalRefunds: 0,
+    };
+  }
 }
 
 

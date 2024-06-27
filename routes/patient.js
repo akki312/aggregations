@@ -130,7 +130,7 @@ router.post('/top-customers', async (req, res) => {
   }
 });
 
-router.post('/inventory/summary', async (req, res) => {
+router.get('/financial-summary', async (req, res) => {
   const { startDate, endDate } = req.query;
 
   if (!startDate || !endDate) {
@@ -138,18 +138,14 @@ router.post('/inventory/summary', async (req, res) => {
   }
 
   try {
-    // Convert the date strings to Date objects
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    // Call your service or function to fetch inventory summary
-    const summary = await patientMedicineService.getFinancialSummary(start, end);
+    const summary = await patientMedicineService.getFinancialSummary(startDate, endDate);
     res.json(summary);
   } catch (error) {
-    console.error('Error fetching inventory summary:', error.message);
-    res.status(500).json({ message: 'Failed to fetch inventory summary' });
+    console.error('Error fetching financial summary:', error.message);
+    res.status(500).json({ message: 'Failed to fetch financial summary' });
   }
 });
+
 
 router.get('/sales-details', async (req, res) => {
   const { startDate, endDate, orderFrom } = req.query;
