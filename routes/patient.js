@@ -130,6 +130,26 @@ router.post('/top-customers', async (req, res) => {
   }
 });
 
+router.post('/inventory/summary', async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+    return res.status(400).json({ message: 'startDate and endDate are required' });
+  }
+
+  try {
+    // Convert the date strings to Date objects
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Call your service or function to fetch inventory summary
+    const summary = await patientMedicineService.getFinancialSummary(start, end);
+    res.json(summary);
+  } catch (error) {
+    console.error('Error fetching inventory summary:', error.message);
+    res.status(500).json({ message: 'Failed to fetch inventory summary' });
+  }
+});
 
 router.get('/sales-details', async (req, res) => {
   const { startDate, endDate, orderFrom } = req.query;
@@ -162,6 +182,11 @@ router.get('/sales-summary', async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch sales summary' });
   }
 });
+
+
+
+
+
 
 
 module.exports= router;
