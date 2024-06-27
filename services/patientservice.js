@@ -228,9 +228,8 @@ const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amo
       }
 
       return {
-        startDate: startDate.toISOString().split('T')[0],  // Format to YYYY-MM-DD
-        endDate: endDate.toISOString().split('T')[0],  // Format to YYYY-MM-DD
-        totalSales: result.totalAmount
+        startDate: startDate.toISOString().split('T')[0],  
+        endDate: endDate.toISOString().split('T')[0],  
       };
     });
   } catch (error) {
