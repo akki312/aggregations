@@ -120,5 +120,21 @@ router.get('/sales-details', async (req, res) => {
 });
 
 
+router.get('/sales-summary', async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+    return res.status(400).json({ message: 'startDate and endDate are required' });
+  }
+
+  try {
+    const summary = await patientMedicineService.getSalesSummary(startDate, endDate);
+    res.json(summary);
+  } catch (error) {
+    console.error('Error fetching sales summary:', error.message);
+    res.status(500).json({ message: 'Failed to fetch sales summary' });
+  }
+});
+
 
 module.exports = router;
