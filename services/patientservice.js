@@ -163,7 +163,7 @@ const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amo
           month: { $month: "$orderedAt" }
         };
       default:
-        throw new Error('Invalid groupBy value');
+        throw new Error(`Invalid groupBy value: ${groupBy}`);
     }
   };
 
@@ -228,8 +228,9 @@ const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amo
       }
 
       return {
-        startDate: startDate.toISOString().split('T')[0],  
-        endDate: endDate.toISOString().split('T')[0],  
+        startDate: startDate.toISOString().split('T')[0],  // Format to YYYY-MM-DD
+        endDate: endDate.toISOString().split('T')[0],  // Format to YYYY-MM-DD
+        totalSales: result.totalAmount
       };
     });
   } catch (error) {
