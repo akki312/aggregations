@@ -464,5 +464,6 @@ module.exports = {
   getOrderSamples,
   getTopCustomers,
   getSalesDetails,
-  getSalesSummary
+  getSalesSummary,
+  getStartEndDates
 };
