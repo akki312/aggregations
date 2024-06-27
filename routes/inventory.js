@@ -103,4 +103,22 @@ router.post('/inventory/summary', async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch inventory summary' });
   }
 });
+
+router.get('/sales-details', async (req, res) => {
+  const { startDate, endDate, orderFrom } = req.query;
+
+  if (!startDate || !endDate || !orderFrom) {
+    return res.status(400).json({ message: 'startDate, endDate, and orderFrom are required' });
+  }
+
+  try {
+    const salesDetails = await inventoryService.getSalesDetails(startDate, endDate, orderFrom);
+    res.status(200).json(salesDetails);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+
 module.exports = router;
