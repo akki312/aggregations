@@ -362,7 +362,7 @@ async function getTopCustomers() {
   return results;
 }
 
-async function getFinancialSummary(startDate, endDate) {
+async function getFinancialSummary(startDate, endDate) {5
   const start = new Date(startDate);
   const end = new Date(endDate);
   
