@@ -371,7 +371,7 @@ async function getSalesDetails(startDate, endDate, orderFrom) {
     {
       $match: {
         orderedOn: { $gte: start, $lte: end },
-        orderFrom: orderFrom
+        orderFrom: orderFrom 
       }
     },
     {
@@ -384,7 +384,7 @@ async function getSalesDetails(startDate, endDate, orderFrom) {
   ]);
 
   // Calculate the total sales for all orders within the date range
-  const totalSalesResult = await Order.aggregate([
+  const totalSalesResult = await orderFrom.aggregate([
     {
       $match: {
         orderedOn: { $gte: start, $lte: end }
