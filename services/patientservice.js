@@ -362,41 +362,95 @@ async function getTopCustomers() {
   return results;
 }
 
-
-async function getFinancialSummary(startDate, endDate) {
+async function getSalesDetails(startDate, endDate, orderFrom) {
   const start = new Date(startDate);
   const end = new Date(endDate);
+  end.setHours(23, 59, 59, 999); // Ensure the end date includes the whole day
 
-  return await Inventory.aggregate([
+  const results = await Order.aggregate([
     {
       $match: {
         orderedOn: { $gte: start, $lte: end },
-      },
+        orderFrom: orderFrom
+      }
+    },
+    {
+      $group: {
+        _id: "$orderFrom",
+        totalSales: { $sum: "$totalAmount" },
+        totalOrders: { $sum: 1 }
+      }
+    }
+  ]);
+
+  // Calculate the total sales for all orders within the date range
+  const totalSalesResult = await Order.aggregate([
+    {
+      $match: {
+        orderedOn: { $gte: start, $lte: end }
+      }
     },
     {
       $group: {
         _id: null,
-        totalSales: { $sum: '$totalAmount' },
-        totalDiscount: { $sum: '$discount' },
-        totalProfit: { $sum: '$profit' },
-        totalRefunds: {
-          $sum: {
-            $cond: [{ $eq: ['$status', 'ORDER_CANCELLED'] }, '$totalAmount', 0],
-          },
-        },
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        totalSales: 1,
-        totalDiscount: 1,
-        totalProfit: 1,
-        totalRefunds: 1,
-      },
-    },
+        totalSales: { $sum: "$totalAmount" }
+      }
+    }
   ]);
+
+  const totalSales = totalSalesResult.length > 0 ? totalSalesResult[0].totalSales : 0;
+
+  return results.map(result => {
+    const percentage = ((result.totalSales / totalSales) * 100).toFixed(2);
+    return {
+      orderFrom: result._id,
+      totalSales: result.totalSales,
+      totalOrders: result.totalOrders,
+      percentage: `${percentage}%`
+    };
+  });
 }
+
+
+async function getSalesSummary(startDate, endDate) {
+  try {
+    const summary = await Sale.aggregate([
+      {
+        $match: {
+          orderDate: { $gte: new Date(startDate), $lte: new Date(endDate) }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalProfit: { $sum: '$profit' },
+          totalDiscount: { $sum: '$discount' },
+          totalSales: { $sum: '$totalAmount' },
+          totalRefunds: { $sum: '$refunds' }
+        }
+      }
+    ]);
+
+    if (summary.length > 0) {
+      return {
+        totalProfit: summary[0].totalProfit,
+        totalDiscount: summary[0].totalDiscount,
+        totalSales: summary[0].totalSales,
+        totalRefunds: summary[0].totalRefunds
+      };
+    } else {
+      return {
+        totalProfit: 0,
+        totalDiscount: 0,
+        totalSales: 0,
+        totalRefunds: 0
+      };
+    }
+  } catch (error) {
+    throw new Error('Error fetching sales summary: ' + error.message);
+  }
+}
+
 
 
 
@@ -411,5 +465,6 @@ module.exports = {
   getOrderSummary,
   getOrderSamples,
   getTopCustomers,
-  getFinancialSummary
+  getSalesDetails,
+  getSalesSummary
 };
