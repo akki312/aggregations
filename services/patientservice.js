@@ -362,39 +362,40 @@ async function getTopCustomers() {
   return results;
 }
 
-async function getFinancialSummary(startDate, endDate) {5
+
+async function getFinancialSummary(startDate, endDate) {
   const start = new Date(startDate);
   const end = new Date(endDate);
-  
-  
-  end.setHours(23, 59, 59, 999);
 
-  try {
-    const result = PatientMedicine.aggregate([
-      {
-        $match: {
-          date: { $gte: start, $lte: end }
-        }
+  return await Inventory.aggregate([
+    {
+      $match: {
+        orderedOn: { $gte: start, $lte: end },
       },
-      {
-        $group: {
-          _id: null,
-          totalAmount: { $sum: "$amount" },
-          netAmount: { $sum: "$netamount" }
-        }
-      }
-    ]);
-
-    // Return a single object instead of an array
-    if (result.length > 0) {
-      return result[0];
-    } else {
-      return { totalSales: 0, totalPurchases: 0 };
-    }
-  } catch (error) {
-    console.error("Error in getFinancialSummary:", error);
-    throw error; // or handle error as appropriate
-  }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSales: { $sum: '$totalAmount' },
+        totalDiscount: { $sum: '$discount' },
+        totalProfit: { $sum: '$profit' },
+        totalRefunds: {
+          $sum: {
+            $cond: [{ $eq: ['$status', 'ORDER_CANCELLED'] }, '$totalAmount', 0],
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        totalSales: 1,
+        totalDiscount: 1,
+        totalProfit: 1,
+        totalRefunds: 1,
+      },
+    },
+  ]);
 }
 
 

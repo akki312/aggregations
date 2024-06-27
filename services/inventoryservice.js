@@ -308,6 +308,41 @@ async function getDrugsExpiringSoon() {
     throw error;
   }
 }
+async function getFinancialSummary(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  return await Inventory.aggregate([
+    {
+      $match: {
+        orderedOn: { $gte: start, $lte: end },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalSales: { $sum: '$totalAmount' },
+        totalDiscount: { $sum: '$discount' },
+        totalProfit: { $sum: '$profit' },
+        totalRefunds: {
+          $sum: {
+            $cond: [{ $eq: ['$status', 'ORDER_CANCELLED'] }, '$totalAmount', 0],
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        totalSales: 1,
+        totalDiscount: 1,
+        totalProfit: 1,
+        totalRefunds: 1,
+      },
+    },
+  ]);
+}
+
 
 
 
@@ -320,5 +355,6 @@ module.exports = {
   deleteInventory,
   getLowStockDrugs,
   getExpiredDrugs,
-  getDrugsExpiringSoon
+  getDrugsExpiringSoon,
+  getFinancialSummary
 };
