@@ -409,7 +409,7 @@ async function getSalesDetails(startDate, endDate, orderFrom) {
     {
       $match: {
         orderedOn: { $gte: start, $lte: end },
-        orderFrom: orderFrom
+        orderFrom: 1
       }
     },
     {
