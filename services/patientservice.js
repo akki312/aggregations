@@ -372,7 +372,7 @@ async function getFinancialSummary(startDate, endDate) {
   const results = await PatientMedicine.aggregate([
     {
       $match: {
-        orderedOn: { $gte: start, $lte: end },
+        orderedAt: { $gte: start, $lte: end },
       },
     },
     {
