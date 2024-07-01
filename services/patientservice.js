@@ -412,7 +412,7 @@ async function getSalesDetails(startDate, endDate, orderFrom) {
     {
       $match: {
         orderedOn: { $gte: start, $lte: end },
-        orderFrom: 1
+        orderFrom: orderFrom
       }
     },
     {
@@ -434,7 +434,7 @@ async function getSalesDetails(startDate, endDate, orderFrom) {
     {
       $group: {
         _id: null,
-        totalSalesResult: { $sum: "$totalAmount" }
+        totalSales: { $sum: "$totalAmount" }
       }
     }
   ]);

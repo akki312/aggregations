@@ -155,10 +155,11 @@ router.get('/sales-details', async (req, res) => {
   }
 
   try {
-    const salesDetails = await patientMedicineService.getSalesDetails(startDate, endDate, orderFrom);
-    res.status(200).json(salesDetails);
+    const details = await getSalesDetails(startDate, endDate, orderFrom);
+    res.json(details);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching sales details:', error.message);
+    res.status(500).json({ message: 'Failed to fetch sales details' });
   }
 });
 
