@@ -404,54 +404,58 @@ async function getFinancialSummary(startDate, endDate) {
 
 
 async function getSalesDetails(startDate, endDate, orderFrom) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  end.setHours(23, 59, 59, 999); // Ensure the end date includes the whole day
+  try {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); // Ensure the end date includes the whole day
 
-  const results = await Order.aggregate([
-    {
-      $match: {
-        orderedOn: { $gte: start, $lte: end },
-        orderFrom: orderFrom
+    // Aggregate results based on the specified orderFrom
+    const results = await Order.aggregate([
+      {
+        $match: {
+          orderedOn: { $gte: start, $lte: end },
+          orderFrom: orderFrom
+        }
+      },
+      {
+        $group: {
+          _id: "$orderFrom",
+          totalSales: { $sum: "$totalAmount" },
+          totalOrders: { $sum: 1 }
+        }
       }
-    },
-    {
-      $group: {
-        _id: "$orderFrom",
-        totalSales: { $sum: "$totalAmount" },
-        totalOrders: { $sum: 1 }
-      }
-    }
-  ]);
+    ]);
 
-  // Calculate the total sales for all orders within the date range
-  const totalSalesResult = await Order.aggregate([
-    {
-      $match: {
-        orderedOn: { $gte: start, $lte: end }
+    // Calculate the total sales for all orders within the date range
+    const totalSalesResult = await Order.aggregate([
+      {
+        $match: {
+          orderedOn: { $gte: start, $lte: end }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalSales: { $sum: "$totalAmount" }
+        }
       }
-    },
-    {
-      $group: {
-        _id: null,
-        totalSales: { $sum: "$totalAmount" }
-      }
-    }
-  ]);
+    ]);
 
-  const totalSales = totalSalesResult.length > 0 ? totalSalesResult[0].totalSales : 0;
+    const totalSales = totalSalesResult.length > 0 ? totalSalesResult[0].totalSales : 0;
 
-  return results.map(result => {
-    const percentage = ((result.totalSales / totalSales) * 100).toFixed(2);
-    return {
-      orderFrom: result._id,
-      totalSales: result.totalSales,
-      totalOrders: result.totalOrders,
-      percentage: `${percentage}%`
-    };
-  });
+    return results.map(result => {
+      const percentage = ((result.totalSales / totalSales) * 100).toFixed(2);
+      return {
+        orderFrom: result._id,
+        totalSales: result.totalSales,
+        totalOrders: result.totalOrders,
+        percentage: `${percentage}%`
+      };
+    });
+  } catch (error) {
+    throw new Error(`Error fetching sales details: ${error.message}`);
+  }
 }
-
 async function getSalesSummary(startDate, endDate) {
   try {
     const summary = await Sale.aggregate([
