@@ -413,7 +413,7 @@ async function getSalesDetails(startDate, endDate, orderFrom) {
     const results = await Order.aggregate([
       {
         $match: {
-          orderedOn: { $gte: start, $lte: end },
+          orderedAt: { $gte: start, $lte: end },
           orderFrom: orderFrom
         }
       },
@@ -430,7 +430,7 @@ async function getSalesDetails(startDate, endDate, orderFrom) {
     const totalSalesResult = await Order.aggregate([
       {
         $match: {
-          orderedOn: { $gte: start, $lte: end }
+          orderedAt: { $gte: start, $lte: end }
         }
       },
       {
