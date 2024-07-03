@@ -7,6 +7,7 @@ services:
     hostname: mymongo
     volumes:
       - /home/akshith/mongo_backup/:/db
+
   libraryapi:
     image: aggregateapi
     deploy:
@@ -15,15 +16,14 @@ services:
         condition: on-failure
     hostname: aggregateapi
     environment:
-      - EXPRESS_PORT = 3000
-      - EXPRESS_HOST = 0.0.0.0
-      - MONGODB_CONNECTIONSTRING = mongodb+srv://akshithsistla:ccipnWsoxp5NQ0nm@cluster0.iljkeyx.mongodb.net/docisn
+      - EXPRESS_PORT=3000
+      - EXPRESS_HOST=0.0.0.0
+      - MONGODB_CONNECTIONSTRING=mongodb+srv://akshithsistla:ccipnWsoxp5NQ0nm@cluster0.iljkeyx.mongodb.net/docisn
     volumes:
-      - /home/akshith/desktop/aggregations
-      - /home/akshith/desktop/aggregations/node_modules
+      - /home/akshith/desktop/aggregations:/usr/src/app
+      - /home/akshith/desktop/aggregations/node_modules:/usr/src/app/node_modules
     depends_on:
       - mymongo
     ports:
-      - 3001:3001
+      - "3001:3001"
     command: nodemon app.js
-
