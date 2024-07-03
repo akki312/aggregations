@@ -1,0 +1,29 @@
+version: "3"
+services:
+  mymongo:
+    image: mongo:5.0.2
+    ports:
+      - "27017:27017"
+    hostname: mymongo
+    volumes:
+      - /home/akshith/mongo_backup/:/db
+  libraryapi:
+    image: aggregateapi
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    hostname: aggregateapi
+    environment:
+      - EXPRESS_PORT = 3000
+      - EXPRESS_HOST = 0.0.0.0
+      - MONGODB_CONNECTIONSTRING = mongodb+srv://akshithsistla:ccipnWsoxp5NQ0nm@cluster0.iljkeyx.mongodb.net/docisn
+    volumes:
+      - /home/akshith/desktop/aggregations
+      - /home/akshith/desktop/aggregations/node_modules
+    depends_on:
+      - mymongo
+    ports:
+      - 3001:3001
+    command: nodemon app.js
+

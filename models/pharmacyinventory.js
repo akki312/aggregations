@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 
+
 const InventorySchema = mongoose.Schema({
   email: { type: String },
   supplierName: { type: String },
