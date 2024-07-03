@@ -1,36 +1,48 @@
 const mongoose = require('mongoose');
-// services/patientMedicineService.js
+const logger = require('../loaders/logger'); // Adjust the path as necessary
 const PatientMedicine = require('../models/patientmedicineschema');
 
 const createOrder = async (orderData) => {
   try {
     const newOrder = new PatientMedicine(orderData);
-    return await newOrder.save();
+    const savedOrder = await newOrder.save();
+    logger.info('Order created successfully');
+    return savedOrder;
   } catch (error) {
+    logger.error('Error creating order: ' + error.message);
     throw new Error('Error creating order: ' + error.message);
   }
 };
 
 const updateOrder = async (orderId, updateData) => {
   try {
-    return await PatientMedicine.findByIdAndUpdate(orderId, updateData, { new: true });
+    const updatedOrder = await PatientMedicine.findByIdAndUpdate(orderId, updateData, { new: true });
+    logger.info('Order updated successfully');
+    return updatedOrder;
   } catch (error) {
+    logger.error('Error updating order: ' + error.message);
     throw new Error('Error updating order: ' + error.message);
   }
 };
 
 const getOrderById = async (orderId) => {
   try {
-    return await PatientMedicine.findById(orderId);
+    const order = await PatientMedicine.findById(orderId);
+    logger.info('Order fetched successfully');
+    return order;
   } catch (error) {
+    logger.error('Error fetching order: ' + error.message);
     throw new Error('Error fetching order: ' + error.message);
   }
 };
 
 const getAllOrders = async () => {
   try {
-    return await PatientMedicine.find();
+    const orders = await PatientMedicine.find();
+    logger.info('Orders fetched successfully');
+    return orders;
   } catch (error) {
+    logger.error('Error fetching orders: ' + error.message);
     throw new Error('Error fetching orders: ' + error.message);
   }
 };
@@ -72,39 +84,48 @@ const getAggregatedData = async () => {
       }
     ];
 
-    return await PatientMedicine.aggregate(aggregationPipeline);
+    const data = await PatientMedicine.aggregate(aggregationPipeline);
+    logger.info('Aggregated data fetched successfully');
+    return data;
   } catch (error) {
+    logger.error('Error fetching aggregated data: ' + error.message);
     throw new Error('Error fetching aggregated data: ' + error.message);
   }
 };
-async function getCashFlowAnalysis(startDate, endDate) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
 
-  const result = await PatientMedicine.aggregate([
-    {
-      $match: {
-        orderedAt: { $gte: start, $lte: end },
-      }
-    },
-    {
-      $group: {
-        _id: "$modeOfPayment",
-        totalAmount: { $sum: "$totalAmount" }
-      }
-    },
-    {
-      $project: {
-        modeOfPayment: "$_id",
-        totalAmount: 1,
-        _id: 0
-      }
-    }
-  ]);
+const getCashFlowAnalysis = async (startDate, endDate) => {
+  try {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
-  return result;
-}
+    const result = await PatientMedicine.aggregate([
+      {
+        $match: {
+          orderedAt: { $gte: start, $lte: end },
+        }
+      },
+      {
+        $group: {
+          _id: "$modeOfPayment",
+          totalAmount: { $sum: "$totalAmount" }
+        }
+      },
+      {
+        $project: {
+          modeOfPayment: "$_id",
+          totalAmount: 1,
+          _id: 0
+        }
+      }
+    ]);
 
+    logger.info('Cash flow analysis fetched successfully');
+    return result;
+  } catch (error) {
+    logger.error('Error fetching cash flow analysis: ' + error.message);
+    throw new Error('Error fetching cash flow analysis: ' + error.message);
+  }
+};
 
 const getStartEndDates = (startDate, endDate, groupBy) => {
   const start = new Date(startDate);
@@ -133,41 +154,41 @@ const getStartEndDates = (startDate, endDate, groupBy) => {
       };
       break;
   }
+  logger.info('Start and end dates calculated');
   return { start, end, interval };
 };
 
 const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amountKey) => {
-  const start = new Date(startDate);
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(endDate);
-  end.setHours(23, 59, 59, 999);
-
-  // Helper function to create the grouping interval object
-  const createIntervalObject = (groupBy) => {
-    switch (groupBy) {
-      case 'DAY':
-        return {
-          year: { $year: "$orderedAt" },
-          month: { $month: "$orderedAt" },
-          day: { $dayOfMonth: "$orderedAt" }
-        };
-      case 'WEEK':
-        return {
-          year: { $year: "$orderedAt" },
-          week: { $week: "$orderedAt" }
-        };
-      case 'MONTH':
-        return {
-          year: { $year: "$orderedAt" },
-          month: { $month: "$orderedAt" }
-        };
-      default:
-        throw new Error(`Invalid groupBy value: ${groupBy}`);
-    }
-  };
-
   try {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    const createIntervalObject = (groupBy) => {
+      switch (groupBy) {
+        case 'DAY':
+          return {
+            year: { $year: "$orderedAt" },
+            month: { $month: "$orderedAt" },
+            day: { $dayOfMonth: "$orderedAt" }
+          };
+        case 'WEEK':
+          return {
+            year: { $year: "$orderedAt" },
+            week: { $week: "$orderedAt" }
+          };
+        case 'MONTH':
+          return {
+            year: { $year: "$orderedAt" },
+            month: { $month: "$orderedAt" }
+          };
+        default:
+          throw new Error(`Invalid groupBy value: ${groupBy}`);
+      }
+    };
+
     const interval = createIntervalObject(groupBy);
     const results = await PatientMedicine.aggregate([
       {
@@ -211,6 +232,7 @@ const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amo
       }
     ]);
 
+    logger.info('Sales graph data fetched successfully');
     return results.map(result => {
       let startDate, endDate;
 
@@ -234,20 +256,19 @@ const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amo
       };
     });
   } catch (error) {
-    console.error('Error fetching sales graph data:', error.message);
-    throw error;
+    logger.error('Error fetching sales graph data: ' + error.message);
+    throw new Error('Error fetching sales graph data: ' + error.message);
   }
 };
 
-
 const getOrderSummary = async (startDate, endDate) => {
-  const start = new Date(startDate);
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(endDate);
-  end.setHours(23, 59, 59, 999);
-
   try {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
     const results = await PatientMedicine.aggregate([
       {
         $match: {
@@ -257,245 +278,132 @@ const getOrderSummary = async (startDate, endDate) => {
       {
         $group: {
           _id: "$orderFrom",
-          totalOrders: { $sum: 1 }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalOrders: { $sum: "$totalOrders" },
-          ordersByPlatform: {
-            $push: {
-              platform: "$_id",
-              count: "$totalOrders"
-            }
-          }
+          totalOrders: { $sum: 1 },
+          totalAmount: { $sum: "$totalAmount" },
         }
       },
       {
         $project: {
-          _id: 0,
+          orderFrom: "$_id",
           totalOrders: 1,
-          ordersByPlatform: 1
+          totalAmount: 1,
+          _id: 0,
         }
       }
     ]);
 
-    if (results.length === 0) {
-      return {
-        totalOrders: 0,
-        ordersByPlatform: []
-      };
-    }
-    return results[0];
+    logger.info('Order summary fetched successfully');
+    return results;
   } catch (error) {
-    console.error('Error fetching order summary:', error.message);
-    throw error;
+    logger.error('Error fetching order summary: ' + error.message);
+    throw new Error('Error fetching order summary: ' + error.message);
   }
 };
 
+const getOrderDetails = async (startDate, endDate) => {
+  try {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
 
-async function getOrderSamples() {
-  const pipeline = [
-    {
-      $facet: {
-        pendingOrders: [
-          { $match: { status: "ORDER_PAYMENT_PENDING" } },
-          { $limit: 5 }
-        ],
-        completedOrders: [
-          { $match: { status: "ORDER_DELIVERED" } },
-          { $limit: 5 }
-        ],
-        cancelledOrders: [
-          { $match: { status: "ORDER_CANCELLED" } },
-          { $limit: 5 }
-        ]
-      }
-    },
-    {
-      $project: {
-        pendingOrders: 1,
-        completedOrders: 1,
-        cancelledOrders: 1
-      }
-    }
-  ];
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
 
-  const results = await PatientMedicine.aggregate(pipeline);
-
-  if (results.length === 0) {
-    return {
-      pendingOrders: [],
-      completedOrders: [],
-      cancelledOrders: []
-    };
-  }
-
-  return results[0];
-}
-
-async function getTopCustomers() {
-  const pipeline = [
-    {
-      $group: {
-        _id: "$patientName",
-        totalPurchases: { $sum: 1 }
-      }
-    },
-    {
-      $sort: { totalPurchases: -1 }
-    },
-    {
-      $limit: 5
-    },
-    {
-      $project: {
-        _id: 0,
-        patientName: "$_id",
-        totalPurchases: 1
-      }
-    }
-  ];
-
-  const results = await PatientMedicine.aggregate(pipeline);
-  return results;
-}
-
-
-
-async function getFinancialSummary(startDate, endDate) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  end.setHours(23, 59, 59, 999); // Ensure the end date includes the whole day
-
-  const results = await PatientMedicine.aggregate([
-    {
-      $match: {
-        orderedAt: { $gte: start, $lte: end },
+    const results = await PatientMedicine.aggregate([
+      {
+        $match: {
+          orderedAt: { $gte: start, $lte: end },
+        }
       },
-    },
-    {
-      $group: {
-        _id: null,
-        totalProfit: { $sum: "$profit" },
-        totalDiscount: { $sum: "$discount" },
-        totalSales: { $sum: "$totalAmount" },
-        totalRefunds: {
-          $sum: {
-            $cond: [{ $eq: ["$billType", "RETURN"] }, "$totalAmount", 0],
-          },
-        },
+      {
+        $lookup: {
+          from: "patients",
+          localField: "patientID",
+          foreignField: "_id",
+          as: "patientDetails"
+        }
       },
-    },
-  ]);
+      {
+        $unwind: "$patientDetails"
+      },
+      {
+        $project: {
+          orderID: 1,
+          orderedAt: 1,
+          status: 1,
+          totalAmount: 1,
+          modeOfPayment: 1,
+          patientName: "$patientDetails.name",
+          patientEmail: "$patientDetails.email"
+        }
+      },
+      {
+        $sort: { orderedAt: -1 }  // Sort by most recent orders
+      }
+    ]);
 
-  if (results.length > 0) {
-    return results[0];
-  } else {
-    return {
-      totalProfit: 0,
-      totalDiscount: 0,
-      totalSales: 0,
-      totalRefunds: 0,
-    };
+    logger.info('Order details fetched successfully');
+    return results;
+  } catch (error) {
+    logger.error('Error fetching order details: ' + error.message);
+    throw new Error('Error fetching order details: ' + error.message);
   }
-}
+};
 
-
-async function getSalesDetails(startDate, endDate, orderFrom) {
+const getTopCustomers = async (startDate, endDate) => {
   try {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999); // Ensure the end date includes the whole day
+    end.setHours(23, 59, 59, 999); // Set end time to 23:59:59.999
 
-    // Aggregate results based on the specified orderFrom
-    const results = await Order.aggregate([
+    const results = await PatientMedicine.aggregate([
       {
         $match: {
-          orderedOn: { $gte: start, $lte: end },
-          orderFrom: orderFrom
+          orderedAt: { $gte: start, $lte: end },
+          status: 'ORDER_DELIVERED'
         }
       },
       {
         $group: {
-          _id: "$orderFrom",
-          totalSales: { $sum: "$totalAmount" },
+          _id: '$patientID',
+          totalAmountSpent: { $sum: '$totalAmount' },
           totalOrders: { $sum: 1 }
         }
-      }
-    ]);
-
-    // Calculate the total sales for all orders within the date range
-    const totalSalesResult = await Order.aggregate([
+      },
       {
-        $match: {
-          orderedAt: { $gte: start, $lte: end }
+        $lookup: {
+          from: 'patients',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'patientDetails'
         }
       },
       {
-        $group: {
-          _id: null,
-          totalSales: { $sum: "$totalAmount" }
-        }
-      }
-    ]);
-
-    const totalSales = totalSalesResult.length > 0 ? totalSalesResult[0].totalSales : 0;
-
-    return results.map(result => {
-      const percentage = ((result.totalSales / totalSales) * 100).toFixed(2);
-      return {
-        orderFrom: result._id,
-        totalSales: result.totalSales,
-        totalOrders: result.totalOrders,
-        percentage: `${percentage}%`
-      };
-    });
-  } catch (error) {
-    throw new Error(`Error fetching sales details: ${error.message}`);
-  }
-}
-async function getSalesSummary(startDate, endDate) {
-  try {
-    const summary = await Sale.aggregate([
+        $unwind: '$patientDetails'
+      },
       {
-        $match: {
-          orderDate: { $gte: new Date(startDate), $lte: new Date(endDate) }
+        $project: {
+          patientID: '$_id',
+          totalAmountSpent: 1,
+          totalOrders: 1,
+          patientName: '$patientDetails.name',
+          patientEmail: '$patientDetails.email'
         }
       },
       {
-        $group: {
-          _id: null,
-          totalProfit: { $sum: '$profit' },
-          totalDiscount: { $sum: '$discount' },
-          totalSalesResult: { $sum: '$totalAmount' },
-          totalRefunds: { $sum: '$refunds' }
-        }
+        $sort: { totalAmountSpent: -1 }
+      },
+      {
+        $limit: 10  // Top 10 customers
       }
     ]);
 
-    if (summary.length > 0) {
-      return {
-        totalProfit: summary[0].totalProfit,
-        totalDiscount: summary[0].totalDiscount,
-        totalSales: summary[0].totalSales,
-        totalRefunds: summary[0].totalRefunds
-      };
-    } else {
-      return {
-        totalProfit: 0,
-        totalDiscount: 0,
-        totalSales: 0,
-        totalRefunds: 0
-      };
-    }
+    logger.info('Top customers fetched successfully');
+    return results;
   } catch (error) {
-    throw new Error('Error fetching sales summary: ' + error.message);
+    logger.error('Error fetching top customers: ' + error.message);
+    throw new Error('Error fetching top customers: ' + error.message);
   }
-}
-
-
+};
 
 module.exports = {
   createOrder,
@@ -506,10 +414,6 @@ module.exports = {
   getCashFlowAnalysis,
   getSalesGraphData,
   getOrderSummary,
-  getOrderSamples,
-  getTopCustomers,
-  getFinancialSummary,
-  getSalesDetails,
-  getSalesSummary,
-  getStartEndDates
+  getOrderDetails,
+  getTopCustomers
 };
