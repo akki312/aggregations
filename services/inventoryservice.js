@@ -1,41 +1,48 @@
 const mongoose = require('mongoose');
 const Inventory = require('../models/pharmacyinventory');
+const logger = require('../loaders/logger'); // Adjust the path as necessary
 
 // Create a new inventory item
 async function createInventory(data) {
-  const inventory = new Inventory(data);
-  await inventory.save();
-  return await Inventory.aggregate([
-    { $match: { _id: inventory._id } },
-    {
-      $project: {
-        email: 1,
-        supplierName: 1,
-        drugName: 1,
-        composition: 1,
-        drugType: 1,
-        batchID: 1,
-        quantity: 1,
-        supplierLicenseNumber: 1,
-        drugLicenseNumber: 1,
-        expireDate: 1,
-        mrp: 1,
-        rate: 1,
-        amount: 1,
-        free: 1,
-        hsnCode: 1,
-        discount: 1,
-        box: 1,
-        thresholdValue: 1,
-        previousQuantity: 1,
-        createdby: 1,
-        createdUserRole: 1,
-        createdDate: 1,
-        lastUPdatedDate: 1,
-        totalValue: { $multiply: ['$quantity', '$rate'] }
+  try {
+    const inventory = new Inventory(data);
+    await inventory.save();
+    logger.info('Inventory item created successfully');
+    return await Inventory.aggregate([
+      { $match: { _id: inventory._id } },
+      {
+        $project: {
+          email: 1,
+          supplierName: 1,
+          drugName: 1,
+          composition: 1,
+          drugType: 1,
+          batchID: 1,
+          quantity: 1,
+          supplierLicenseNumber: 1,
+          drugLicenseNumber: 1,
+          expireDate: 1,
+          mrp: 1,
+          rate: 1,
+          amount: 1,
+          free: 1,
+          hsnCode: 1,
+          discount: 1,
+          box: 1,
+          thresholdValue: 1,
+          previousQuantity: 1,
+          createdby: 1,
+          createdUserRole: 1,
+          createdDate: 1,
+          lastUPdatedDate: 1,
+          totalValue: { $multiply: ['$quantity', '$rate'] }
+        }
       }
-    }
-  ]);
+    ]);
+  } catch (error) {
+    logger.error(`Failed to create inventory item: ${error.message}`);
+    throw new Error('Failed to create inventory item');
+  }
 }
 
 // Get inventory item by ID
@@ -78,166 +85,194 @@ async function getInventoryById(id) {
 
     return inventory[0]; // Assuming _id is unique, return the first (and only) result
   } catch (error) {
-    console.error('Error:', error);
-    throw new Error('Failed to retrieve inventory');
+    logger.error(`Failed to retrieve inventory item: ${error.message}`);
+    throw new Error('Failed to retrieve inventory item');
   }
 }
 
 // Get all inventory items
 async function getAllInventories() {
-  return await Inventory.aggregate([
-    {
-      $match: { quantity: { $gt: 0 } }
-    },
-    {
-      $group: {
-        _id: '$supplierLicenseNumber',
-        totalQuantity: { $sum: '$quantity' },
-        totalValue: { $sum: { $multiply: ['$quantity', '$rate'] } }
+  try {
+    return await Inventory.aggregate([
+      {
+        $match: { quantity: { $gt: 0 } }
+      },
+      {
+        $group: {
+          _id: '$supplierLicenseNumber',
+          totalQuantity: { $sum: '$quantity' },
+          totalValue: { $sum: { $multiply: ['$quantity', '$rate'] } }
+        }
+      },
+      {
+        $project: {
+          supplierLicenseNumber: '$_id',
+          totalQuantity: 1,
+          totalValue: 1,
+          _id: 0
+        }
       }
-    },
-    {
-      $project: {
-        supplierLicenseNumber: '$_id',
-        totalQuantity: 1,
-        totalValue: 1,
-        _id: 0
-      }
-    }
-  ]);
+    ]);
+  } catch (error) {
+    logger.error(`Failed to fetch all inventory items: ${error.message}`);
+    throw new Error('Failed to fetch all inventory items');
+  }
 }
 
 // Update inventory item
 async function updateInventory(id, data) {
-  await Inventory.findByIdAndUpdate(id, data, { new: true });
-  return await Inventory.aggregate([
-    { $match: { _id: mongoose.Types.ObjectId(id) } },
-    {
-      $project: {
-        email: 1,
-        supplierName: 1,
-        drugName: 1,
-        composition: 1,
-        drugType: 1,
-        batchID: 1,
-        quantity: 1,
-        supplierLicenseNumber: 1,
-        drugLicenseNumber: 1,
-        expireDate: 1,
-        mrp: 1,
-        rate: 1,
-        amount: 1,
-        free: 1,
-        hsnCode: 1,
-        discount: 1,
-        box: 1,
-        thresholdValue: 1,
-        previousQuantity: 1,
-        createdby: 1,
-        createdUserRole: 1,
-        createdDate: 1,
-        lastUPdatedDate: 1,
-        totalValue: { $multiply: ['$quantity', '$rate'] }
+  try {
+    await Inventory.findByIdAndUpdate(id, data, { new: true });
+    logger.info(`Inventory item updated successfully with ID: ${id}`);
+    return await Inventory.aggregate([
+      { $match: { _id: mongoose.Types.ObjectId(id) } },
+      {
+        $project: {
+          email: 1,
+          supplierName: 1,
+          drugName: 1,
+          composition: 1,
+          drugType: 1,
+          batchID: 1,
+          quantity: 1,
+          supplierLicenseNumber: 1,
+          drugLicenseNumber: 1,
+          expireDate: 1,
+          mrp: 1,
+          rate: 1,
+          amount: 1,
+          free: 1,
+          hsnCode: 1,
+          discount: 1,
+          box: 1,
+          thresholdValue: 1,
+          previousQuantity: 1,
+          createdby: 1,
+          createdUserRole: 1,
+          createdDate: 1,
+          lastUPdatedDate: 1,
+          totalValue: { $multiply: ['$quantity', '$rate'] }
+        }
       }
-    }
-  ]);
+    ]);
+  } catch (error) {
+    logger.error(`Failed to update inventory item with ID ${id}: ${error.message}`);
+    throw new Error(`Failed to update inventory item with ID ${id}`);
+  }
 }
 
 // Delete inventory item
 async function deleteInventory(id) {
-  const inventory = await Inventory.findByIdAndDelete(id);
-  if (!inventory) {
-    throw new Error('Inventory item not found');
+  try {
+    const inventory = await Inventory.findByIdAndDelete(id);
+    if (!inventory) {
+      throw new Error('Inventory item not found');
+    }
+    logger.info(`Inventory item deleted successfully with ID: ${id}`);
+    return await Inventory.aggregate([
+      { $match: { _id: mongoose.Types.ObjectId(id) } },
+      {
+        $project: {
+          email: 1,
+          supplierName: 1,
+          drugName: 1,
+          composition: 1,
+          drugType: 1,
+          batchID: 1,
+          quantity: 1,
+          supplierLicenseNumber: 1,
+          drugLicenseNumber: 1,
+          expireDate: 1,
+          mrp: 1,
+          rate: 1,
+          amount: 1,
+          free: 1,
+          hsnCode: 1,
+          discount: 1,
+          box: 1,
+          thresholdValue: 1,
+          previousQuantity: 1,
+          createdby: 1,
+          createdUserRole: 1,
+          createdDate: 1,
+          lastUPdatedDate: 1,
+          totalValue: { $multiply: ['$quantity', '$rate'] }
+        }
+      }
+    ]);
+  } catch (error) {
+    logger.error(`Failed to delete inventory item with ID ${id}: ${error.message}`);
+    throw new Error(`Failed to delete inventory item with ID ${id}`);
   }
-  return await Inventory.aggregate([
-    { $match: { _id: mongoose.Types.ObjectId(id) } },
-    {
-      $project: {
-        email: 1,
-        supplierName: 1,
-        drugName: 1,
-        composition: 1,
-        drugType: 1,
-        batchID: 1,
-        quantity: 1,
-        supplierLicenseNumber: 1,
-        drugLicenseNumber: 1,
-        expireDate: 1,
-        mrp: 1,
-        rate: 1,
-        amount: 1,
-        free: 1,
-        hsnCode: 1,
-        discount: 1,
-        box: 1,
-        thresholdValue: 1,
-        previousQuantity: 1,
-        createdby: 1,
-        createdUserRole: 1,
-        createdDate: 1,
-        lastUPdatedDate: 1,
-        totalValue: { $multiply: ['$quantity', '$rate'] }
-      }
-    }
-  ]);
 }
 
-
-
-
+// Get low stock drugs
 async function getLowStockDrugs() {
-  const pipeline = [
-    {
-      $match: {
-        quantity: { $lt: 10 }
+  try {
+    const pipeline = [
+      {
+        $match: {
+          quantity: { $lt: 10 }
+        }
+      },
+      {
+        $project: {
+          drugName: 1,
+          quantity: 1,
+          thresholdValue: 1,
+          supplierName: 1,
+          drugType: 1,
+          batchID: 1,
+          expireDate: 1,
+          mrp: 1,
+          rate: 1
+        }
       }
-    },
-    {
-      $project: {
-        drugName: 1,
-        quantity: 1,
-        thresholdValue: 1,
-        supplierName: 1,
-        drugType: 1,
-        batchID: 1,
-        expireDate: 1,
-        mrp: 1,
-        rate: 1
-      }
-    }
-  ];
+    ];
 
-  const results = await Inventory.aggregate(pipeline);
-  return results;
+    const results = await Inventory.aggregate(pipeline);
+    logger.info('Retrieved low stock drugs successfully');
+    return results;
+  } catch (error) {
+    logger.error(`Failed to fetch low stock drugs: ${error.message}`);
+    throw new Error('Failed to fetch low stock drugs');
+  }
 }
 
+// Get expired drugs
 async function getExpiredDrugs() {
-  const today = new Date();
-  const pipeline = [
-    {
-      $match: {
-        expireDate: { $lt: today }
+  try {
+    const today = new Date();
+    const pipeline = [
+      {
+        $match: {
+          expireDate: { $lt: today }
+        }
+      },
+      {
+        $project: {
+          drugName: 1,
+          quantity: 1,
+          expiryDate: 1,
+          supplierName: 1,
+          drugType: 1,
+          batchID: 1,
+          mrp: 1,
+          rate: 1
+        }
       }
-    },
-    {
-      $project: {
-        drugName: 1,
-        quantity: 1,
-        expiryDate: 1,
-        supplierName: 1,
-        drugType: 1,
-        batchID: 1,
-        mrp: 1,
-        rate: 1
-      }
-    }
-  ];
+    ];
 
-  const results = await Inventory.aggregate(pipeline);
-  return results;
+    const results = await Inventory.aggregate(pipeline);
+    logger.info('Retrieved expired drugs successfully');
+    return results;
+  } catch (error) {
+    logger.error(`Failed to fetch expired drugs: ${error.message}`);
+    throw new Error('Failed to fetch expired drugs');
+  }
 }
 
-
+// Get drugs expiring soon
 async function getDrugsExpiringSoon() {
   try {
     const today = new Date();
@@ -302,18 +337,13 @@ async function getDrugsExpiringSoon() {
     ];
 
     const results = await Inventory.aggregate(pipeline);
+    logger.info('Retrieved drugs expiring soon successfully');
     return results;
   } catch (error) {
-    console.error('Error fetching drugs expiring soon:', error.message);
-    throw error;
+    logger.error(`Failed to fetch drugs expiring soon: ${error.message}`);
+    throw new Error('Failed to fetch drugs expiring soon');
   }
 }
-
-
-
-
-
-
 
 module.exports = {
   createInventory,
@@ -324,5 +354,4 @@ module.exports = {
   getLowStockDrugs,
   getExpiredDrugs,
   getDrugsExpiringSoon,
- 
 };

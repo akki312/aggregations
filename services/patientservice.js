@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const logger = require('../loaders/logger'); // Adjust the path as necessary
 const PatientMedicine = require('../models/patientmedicineschema');
+const handleError = require('../loaders/handleError')
 
 const createOrder = async (orderData) => {
   try {
