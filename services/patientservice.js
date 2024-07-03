@@ -8,6 +8,7 @@ const createOrder = async (orderData) => {
     const newOrder = new PatientMedicine(orderData);
     const savedOrder = await newOrder.save();
     logger.info('Order created successfully');
+    
     return savedOrder;
   } catch (error) {
     logger.error('Error creating order: ' + error.message);
