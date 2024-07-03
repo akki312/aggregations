@@ -84,7 +84,7 @@ async function getCashFlowAnalysis(startDate, endDate) {
   const result = await PatientMedicine.aggregate([
     {
       $match: {
-        orderedOn: { $gte: start, $lte: end },
+        orderedAt: { $gte: start, $lte: end },
       }
     },
     {

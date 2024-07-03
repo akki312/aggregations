@@ -74,7 +74,7 @@ router.get('/expired-drugs', async (req, res) => {
 });
 
 
-router.post('/drugs/expiring-soon', async (req, res) => {
+router.get('/drugs/expiring-soon', async (req, res) => {
   try {
     const results = await inventoryService.getDrugsExpiringSoon();
     res.json(results);
