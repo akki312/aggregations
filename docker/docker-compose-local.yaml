@@ -8,7 +8,7 @@ services:
     volumes:
       - /home/akshith/mongo_backup/:/db
 
-  libraryapi:
+  aggregateapi:
     image: aggregateapi
     deploy:
       replicas: 1
