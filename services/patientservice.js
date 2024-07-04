@@ -172,19 +172,19 @@ const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amo
       switch (groupBy) {
         case 'DAY':
           return {
-            year: { $year: "$orderedAt" },
-            month: { $month: "$orderedAt" },
-            day: { $dayOfMonth: "$orderedAt" }
+            year: { $year: "$orderedOn" },
+            month: { $month: "$orderedOn" },
+            day: { $dayOfMonth: "$orderedOn" }
           };
         case 'WEEK':
           return {
-            year: { $year: "$orderedAt" },
-            week: { $week: "$orderedAt" }
+            year: { $year: "$orderedOn" },
+            week: { $week: "$orderedOn" }
           };
         case 'MONTH':
           return {
-            year: { $year: "$orderedAt" },
-            month: { $month: "$orderedAt" }
+            year: { $year: "$orderedOn" },
+            month: { $month: "$orderedOn" }
           };
         default:
           throw new Error(`Invalid groupBy value: ${groupBy}`);

@@ -1,8 +1,16 @@
-// handleError.js
-const handleError = (logger, error, customMessage) => {
-    logger.error(`${customMessage}: ${error.message}`);
-    throw new Error(`${customMessage}: ${error.message}`);
-  };
-  
-  module.exports = handleError;
-  
+// middlewares/handleError.js
+
+function handleError(err, req, res, next) {
+  console.error(err.stack);
+
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
+
+  res.status(statusCode).json({
+    status: 'error',
+    statusCode,
+    message
+  });
+}
+
+module.exports = handleError;
