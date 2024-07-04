@@ -20,8 +20,8 @@ services:
       - EXPRESS_HOST=0.0.0.0
       - MONGODB_CONNECTIONSTRING=mongodb+srv://akshithsistla:ccipnWsoxp5NQ0nm@cluster0.iljkeyx.mongodb.net/docisn
     volumes:
-      - /home/akshith/desktop/aggregations:/usr/src/app
-      - /home/akshith/desktop/aggregations/node_modules:/usr/src/app/node_modules
+      - /home/akshith/desktop/aggregations
+      - /home/akshith/desktop/aggregations/node_modules
     depends_on:
       - mymongo
     ports:
