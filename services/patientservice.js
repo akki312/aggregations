@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const logger = require('../loaders/logger'); // Adjust the path as necessary
 const PatientMedicine = require('../models/patientmedicineschema');
-const handleError = require('../loaders/handleError')
+
 
 const createOrder = async (orderData) => {
   try {
@@ -172,19 +172,19 @@ const getSalesGraphData = async (startDate, endDate, groupBy, licenseNumber, amo
       switch (groupBy) {
         case 'DAY':
           return {
-            year: { $year: "$orderedOn" },
-            month: { $month: "$orderedOn" },
-            day: { $dayOfMonth: "$orderedOn" }
+            year: { $year: "$orderedAt" },
+            month: { $month: "$orderedAt" },
+            day: { $dayOfMonth: "$orderedAt" }
           };
         case 'WEEK':
           return {
-            year: { $year: "$orderedOn" },
-            week: { $week: "$orderedOn" }
+            year: { $year: "$orderedAt" },
+            week: { $week: "$orderedAt" }
           };
         case 'MONTH':
           return {
-            year: { $year: "$orderedOn" },
-            month: { $month: "$orderedOn" }
+            year: { $year: "$orderedAt" },
+            month: { $month: "$orderedAt" }
           };
         default:
           throw new Error(`Invalid groupBy value: ${groupBy}`);
