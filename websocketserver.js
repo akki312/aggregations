@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const { createInventory, getInventoryById, getAllInventories, updateInventory, deleteInventory, getLowStockDrugs, getExpiredDrugs, getDrugsExpiringSoon } = require('./inventoryController');
+const { createInventory, getInventoryById, getAllInventories, updateInventory, deleteInventory, getLowStockDrugs, getExpiredDrugs, getDrugsExpiringSoon } = require('./services/inventoryservice');
 const logger = require('../aggregations/loaders/logger'); // Adjust the path as necessary
 
 const wss = new WebSocket.Server({ port: 8081 });
