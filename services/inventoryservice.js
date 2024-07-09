@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Inventory = require('../models/pharmacyinventory');
 const logger = require('../loaders/logger'); // Adjust the path as necessary
+const { broadcast } = require('../websocketserver'); // Adjust the path as necessary
 
 // Create a new inventory item
 async function createInventory(data) {
@@ -8,6 +9,7 @@ async function createInventory(data) {
     const inventory = new Inventory(data);
     await inventory.save();
     logger.info('Inventory item created successfully');
+    broadcast({ event: 'create', data: inventory }); // Notify clients
     return await Inventory.aggregate([
       { $match: { _id: inventory._id } },
       {
@@ -124,6 +126,7 @@ async function updateInventory(id, data) {
   try {
     await Inventory.findByIdAndUpdate(id, data, { new: true });
     logger.info(`Inventory item updated successfully with ID: ${id}`);
+    broadcast({ event: 'update', data: { id, ...data } }); // Notify clients
     return await Inventory.aggregate([
       { $match: { _id: mongoose.Types.ObjectId(id) } },
       {
@@ -169,6 +172,7 @@ async function deleteInventory(id) {
       throw new Error('Inventory item not found');
     }
     logger.info(`Inventory item deleted successfully with ID: ${id}`);
+    broadcast({ event: 'delete', data: { id } }); // Notify clients
     return await Inventory.aggregate([
       { $match: { _id: mongoose.Types.ObjectId(id) } },
       {
@@ -232,6 +236,7 @@ async function getLowStockDrugs() {
 
     const results = await Inventory.aggregate(pipeline);
     logger.info('Retrieved low stock drugs successfully');
+    broadcast({ event: 'lowStock', data: results }); // Notify clients
     return results;
   } catch (error) {
     logger.error(`Failed to fetch low stock drugs: ${error.message}`);
@@ -265,6 +270,7 @@ async function getExpiredDrugs() {
 
     const results = await Inventory.aggregate(pipeline);
     logger.info('Retrieved expired drugs successfully');
+    broadcast({ event: 'expired', data: results }); // Notify clients
     return results;
   } catch (error) {
     logger.error(`Failed to fetch expired drugs: ${error.message}`);
@@ -338,6 +344,7 @@ async function getDrugsExpiringSoon() {
 
     const results = await Inventory.aggregate(pipeline);
     logger.info('Retrieved drugs expiring soon successfully');
+    broadcast({ event: 'expiringSoon', data: results }); // Notify clients
     return results;
   } catch (error) {
     logger.error(`Failed to fetch drugs expiring soon: ${error.message}`);
