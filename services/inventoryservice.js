@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Inventory = require('../models/pharmacyinventory');
 const logger = require('../loaders/logger'); // Adjust the path as necessary
-const { broadcast } = require('../websocketserver'); // Adjust the path as necessary
+const { broadcast } = require('./websocketservice'); // Adjust the path as necessary
 
 // Create a new inventory item
 async function createInventory(data) {
@@ -36,7 +36,7 @@ async function createInventory(data) {
           createdby: 1,
           createdUserRole: 1,
           createdDate: 1,
-          lastUPdatedDate: 1,
+          lastUpdatedDate: 1,
           totalValue: { $multiply: ['$quantity', '$rate'] }
         }
       }

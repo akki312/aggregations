@@ -1,31 +1,14 @@
-const WebSocket = require('ws');
-const { createInventory, getInventoryById, getAllInventories, updateInventory, deleteInventory, getLowStockDrugs, getExpiredDrugs, getDrugsExpiringSoon } = require('./services/inventoryservice');
-const logger = require('../aggregations/loaders/logger'); // Adjust the path as necessary
+// server.js
+const http = require('http');
+const app = require('./app');
+const websocketService = require('./services/websocketService');
 
-const wss = new WebSocket.Server({ port: 8081 });
+const server = http.createServer(app);
 
-wss.on('connection', (ws) => {
-    console.log('Client connected');
+websocketService.initialize(server);
 
-    ws.on('message', (message) => {
-        console.log(`Received: ${message}`);
-    });
+const PORT = process.env.PORT || 8080;
 
-    ws.on('close', () => {
-        console.log('Client disconnected');
-    });
-
-    ws.on('error', (error) => {
-        console.error(`WebSocket error: ${error.message}`);
-    });
+server.listen(PORT, () => {
+    console.log(`Server is listening on http://localhost:${PORT}`);
 });
-
-function broadcast(data) {
-    wss.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(data));
-        }
-    });
-}
-
-module.exports = { wss, broadcast };
