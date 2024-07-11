@@ -153,7 +153,7 @@ async function updateInventory(id, data) {
           createdby: 1,
           createdUserRole: 1,
           createdDate: 1,
-          lastUPdatedDate: 1,
+          lastUpdatedDate: 1,
           totalValue: { $multiply: ['$quantity', '$rate'] }
         }
       }
@@ -199,7 +199,7 @@ async function deleteInventory(id) {
           createdby: 1,
           createdUserRole: 1,
           createdDate: 1,
-          lastUPdatedDate: 1,
+          lastUpdatedDate: 1,
           totalValue: { $multiply: ['$quantity', '$rate'] }
         }
       }
