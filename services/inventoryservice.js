@@ -210,7 +210,7 @@ async function deleteInventory(id) {
   }
 }
 
-// Get low stock drugs
+
 async function getLowStockDrugs() {
   try {
     const pipeline = [
