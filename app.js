@@ -5,7 +5,7 @@ const inventoryRoutes = require('./routes/inventory');
 const patientRoutes = require('./routes/patient');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 
 mongoose.connect('mongodb+srv://akshithsistla:ccipnWsoxp5NQ0nm@cluster0.iljkeyx.mongodb.net/docisn', {
     useNewUrlParser: true,

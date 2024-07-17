@@ -1,7 +1,7 @@
 // server.js
 const http = require('http');
 const app = require('./app');
-const websocketService = require('./services/websocketService');
+const websocketService = require('./services/websocketservice');
 
 const server = http.createServer(app);
 
