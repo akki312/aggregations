@@ -1,17 +1,8 @@
-# Use the official Node.js image as the base image
-FROM node:16
-
-# Create app directory
+FROM node:16.13.0
 WORKDIR /home/akshith/Desktop/aggregations
-
-# Install app dependencies
-COPY package*.json ./
-
-RUN npm install -g nodemon
+RUN npm i -g nodemon
+COPY ./package.json .
 RUN npm install
-
-# Bundle app source
 COPY . .
-
 EXPOSE 3001
-CMD ["nodemon", "app.js"]
+CMD npm start
