@@ -2,7 +2,7 @@
 FROM node:16
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /home/akshith/Desktop/aggregations
 
 # Copy the package.json and package-lock.json (if available)
 COPY package*.json ./
