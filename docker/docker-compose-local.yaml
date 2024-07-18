@@ -26,4 +26,4 @@ services:
       - mymongo
     ports:
       - "3001:3001"
-    command: nodemon app.js
+    command: nodemon --legacy-watch server.js
