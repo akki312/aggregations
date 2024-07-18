@@ -244,7 +244,7 @@ async function getLowStockDrugs() {
   }
 }
 
-// Get expired drugs
+
 async function getExpiredDrugs() {
   try {
     const today = new Date();
