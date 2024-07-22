@@ -1,4 +1,4 @@
-version: "3"
+version: "3.8"
 services:
   mymongo:
     image: mongo:5.0.2
@@ -7,6 +7,7 @@ services:
     hostname: mymongo
     volumes:
       - /home/akshith/mongo_backup/:/db
+      
 
   aggregateapi:
     image: aggregateapi
